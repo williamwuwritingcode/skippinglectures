@@ -13,12 +13,12 @@ public class Agent {
 
    public char get_action( char view[][], State curState ) {
         
-      Move temp = curState.makeMove();
-      return temp.getMove();
+      // Move temp = curState.makeMove();
+      //return temp.getMove();
 
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
 
-      /*int ch=0;
+      int ch=0;
 
       System.out.print("Enter Action(s): ");
 
@@ -37,7 +37,7 @@ public class Agent {
       catch (IOException e) {
          System.out.println ("IO error:" + e );
       }
-    */
+    
    }
 
    void print_view( char view[][] )
@@ -102,13 +102,16 @@ public class Agent {
                         System.exit(-1);
                      }
                      view[i][j] = (char) ch;
+                     Double x = curState.getCurX();
+                     Double y = curState.getCurY();
+                     Point2D temp = new Point2D.Double(x - 2 + i,y -2 + j);//Minus 2 to offset negative index
+                    updateMap(temp, ch);
                   }
                }
             }
             agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
             action = agent.get_action( view, curState );
             
-
             //<-------------------To here
             
 
