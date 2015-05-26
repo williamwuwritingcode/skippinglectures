@@ -11,11 +11,14 @@ import java.net.*;
 
 public class Agent {
 
-   public char get_action( char view[][] ) {
+   public char get_action( char view[][], State curState ) {
+        
+      Move temp = curState.makeMove();
+      return temp.getMove();
 
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
 
-      int ch=0;
+      /*int ch=0;
 
       System.out.print("Enter Action(s): ");
 
@@ -34,8 +37,7 @@ public class Agent {
       catch (IOException e) {
          System.out.println ("IO error:" + e );
       }
-
-      return 0;
+    */
    }
 
    void print_view( char view[][] )
@@ -69,6 +71,7 @@ public class Agent {
       int port;
       int ch;
       int i,j;
+      State curState = new State();
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");
@@ -88,7 +91,9 @@ public class Agent {
       }
 
       try { // scan 5-by-5 wintow around current location
-         while( true ) {
+         
+          //<--------------------We can touch from here 
+          while( true ) {
             for( i=0; i < 5; i++ ) {
                for( j=0; j < 5; j++ ) {
                   if( !(( i == 2 )&&( j == 2 ))) {
@@ -101,8 +106,13 @@ public class Agent {
                }
             }
             agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
-            action = agent.get_action( view );
-            out.write( action );
+            action = agent.get_action( view, curState );
+            
+
+            //<-------------------To here
+            
+
+            out.write( action ); //Don't touch this line
          }
       }
       catch( IOException e ) {

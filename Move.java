@@ -1,4 +1,4 @@
-public class State {
+public class Move {
 
     private char move;
 
