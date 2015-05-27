@@ -30,7 +30,10 @@ public class Agent {
             switch( ch ) { // if character is a valid action, return it
             case 'F': case 'L': case 'R': case 'C': case 'B':
             case 'f': case 'l': case 'r': case 'c': case 'b':
-               return((char) ch );
+                //Make a new move and update the state
+                Move temp = new Move(ch);
+                curState.adjustState(temp);
+                return((char) ch );
             }
          }
       }
@@ -105,11 +108,11 @@ public class Agent {
                      Double x = curState.getCurX();
                      Double y = curState.getCurY();
                      Point2D temp = new Point2D.Double(x - 2 + i,y -2 + j);//Minus 2 to offset negative index
-                    updateMap(temp, ch);
+                     curState.curMap.updateMap(temp, ch);
                   }
                }
             }
-            agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
+            //agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
             action = agent.get_action( view, curState );
             
             //<-------------------To here

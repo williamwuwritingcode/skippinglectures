@@ -106,6 +106,17 @@ public class Map implements Runnable{
 		}
 	}
 
+    //Returns the value inside a given point
+    public boolean isValidForward(Point2D point, boolean axe) {
+		if (map.contains(point) {
+		    if (map.get(point) == " ") {
+		        return true;
+		    } else if (map.get(point) == 'T' && axe) {
+		    	return true;
+		    }
+		    return false;
+    }
+
 	/*public static void main(String[] args)
 	{
 		Map map = new Map();
