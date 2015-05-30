@@ -42,13 +42,23 @@ public class Map implements Runnable{
 			{'~', '~', '~', ' ', '~'}	 
 		};
 
-		updateMap( view, 0, 0, WEST);
-
-		System.out.println("topLeft: " + topLeft.toString());
-		System.out.println("bottomRight: " + bottomRight.toString());
-
-		System.out.println("Printing map");
+		System.out.println("NORTH");
+		updateMap( view, 0, 0, NORTH);
 		printMap();
+
+		System.out.println("EAST");
+		updateMap( view, 0, 0, EAST);
+		printMap();
+
+		System.out.println("SOUTH");
+		updateMap( view, 0, 0, SOUTH);
+		printMap();
+
+		System.out.println("WEST");
+		updateMap( view, 0, 0, WEST);
+		printMap();
+
+
 	}
 
 
@@ -66,18 +76,25 @@ public class Map implements Runnable{
 	public void updateMap(char[][] view, int x, int y, int dir)
 	{
 		boolean coordsOpposite = false;
-		int xdir = 1; int ydir = -1;
+		int xdir = 1; 
+		int ydir = -1;
 
 		switch (dir){
 			case EAST:
-				coordsOpposite = false;
-				xdir = -1; ydir = -1;
+				coordsOpposite = true;
+				xdir = 1;
+				ydir = 1;
+				break;
 			case SOUTH:
 				coordsOpposite = false;
-				xdir = -1; ydir = 1;
+				xdir = -1; 
+				ydir = 1;
+				break;
 			case WEST:
-				coordsOpposite = false;
-				xdir = 1; ydir = 1;
+				coordsOpposite = true;
+				xdir = -1; 
+				ydir = -1;
+				break;
 		}
 
 		for (int row = 0; row < 5; row++){
@@ -88,10 +105,10 @@ public class Map implements Runnable{
 
 				char thing;
 		 		if(!coordsOpposite){
-		 			thing = view[col][row];
+		 			thing = view[row][col];
 		 		} else
 		 		{
-		 			thing = view[row][col];
+		 			thing = view[col][row];
 		 		}
 
 		 		updateMapPoint(point, thing);
@@ -165,14 +182,14 @@ public class Map implements Runnable{
 	}
    
     //Removes a wall/tree using dynamite
-    public void blow(Point2D point) {
+    public void blow(Point2D.Double point) {
         if (map.get(point) == 'T' || map.get(point) == '*') {
             map.put(point, ' ');
         } 
     }
     
     //Removes a wall using axe
-    public void chop(Point2D point) {
+    public void chop(Point2D.Double point) {
         if (map.get(point) == 'T') {
             map.put(point, ' ');
         }
