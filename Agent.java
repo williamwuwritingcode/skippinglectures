@@ -105,17 +105,20 @@ public class Agent {
                         System.exit(-1);
                      }
                      view[i][j] = (char) ch;
-                     Double x = curState.getCurX();
-                     Double y = curState.getCurY();
-                     Point2D temp = new Point2D.Double(x - 2 + i,y -2 + j);//Minus 2 to offset negative index
-                     curState.curMap.updateMap(temp, ch);
                   }
                }
             }
+
             agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
+
+
+            Double x = curState.getCurX();
+            Double y = curState.getCurY();
+            int dir = curState.getDirection();
+            curState.curMap.updateMap(view, x, y, dir);
+            //agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
+
             action = agent.get_action( view, curState );
-            
-            //<-------------------To here
             
 
             out.write( action ); //Don't touch this line
