@@ -112,7 +112,7 @@ public class Agent {
                   }
                }
             }
-            //agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
+            agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
             action = agent.get_action( view, curState );
             
             //<-------------------To here

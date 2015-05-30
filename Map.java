@@ -13,6 +13,11 @@ public class Map implements Runnable{
 	private Point2D.Double topLeft;
 	private Point2D.Double bottomRight;
 
+	//directions
+	private static final int NORTH = 1;
+	private static final int EAST = 2;
+	private static final int SOUTH = 3;
+	private static final int WEST = 4;
 
 	public Map()
 	{
@@ -29,20 +34,15 @@ public class Map implements Runnable{
 	//get rid of run and main when we implement it
 	public void run()
 	{
-		Point2D.Double p1 = new Point2D.Double(0, 0);
-		updateMap(p1, 'a');
-		Point2D.Double p2 = new Point2D.Double(1, 0);
-		updateMap(p2, 'b');
-		Point2D.Double p3 = new Point2D.Double(2, 0);
-		updateMap(p3, 'd');
-		Point2D.Double p4 = new Point2D.Double(3, 0);
-		updateMap(p4, 'c');
-		Point2D.Double p5= new Point2D.Double(3, 1);
-		updateMap(p5, 'd');
-		Point2D.Double p6 = new Point2D.Double(3, 2);
-		updateMap(p6, 'g');
-		Point2D.Double p7 = new Point2D.Double(3, 3);
-		updateMap(p7, 'e');
+		char[][] view = {
+			{'*', ' ', ' ', '~', '~'},
+			{'~', '*', ' ', '*', '~'},
+			{'B', '*', ' ', ' ', ' '},
+			{'~', ' ', '*', ' ', '~'},
+			{'~', '~', '~', ' ', '~'}	 
+		};
+
+		updateMap( view, 0, 0, WEST);
 
 		System.out.println("topLeft: " + topLeft.toString());
 		System.out.println("bottomRight: " + bottomRight.toString());
@@ -62,8 +62,45 @@ public class Map implements Runnable{
 		return map;
 	}
 
+	//updates map given a view
+	public void updateMap(char[][] view, int x, int y, int dir)
+	{
+		boolean coordsOpposite = false;
+		int xdir = 1; int ydir = -1;
+
+		switch (dir){
+			case EAST:
+				coordsOpposite = false;
+				xdir = -1; ydir = -1;
+			case SOUTH:
+				coordsOpposite = false;
+				xdir = -1; ydir = 1;
+			case WEST:
+				coordsOpposite = false;
+				xdir = 1; ydir = 1;
+		}
+
+		for (int row = 0; row < 5; row++){
+			for (int col = 0; col < 5; col++){
+				int xGlobal = x + (col-2)*xdir;
+				int yGlobal = y + (row-2)*ydir;
+				Point2D.Double point = new Point2D.Double(xGlobal,yGlobal);
+
+				char thing;
+		 		if(!coordsOpposite){
+		 			thing = view[col][row];
+		 		} else
+		 		{
+		 			thing = view[row][col];
+		 		}
+
+		 		updateMapPoint(point, thing);
+			}
+		}
+	}
+
 	//Updates one point on the map at a time
-	public void updateMap(Point2D.Double point, Character thing)
+	public void updateMapPoint(Point2D.Double point, Character thing)
 	{
 		map.put(point, thing);
 
@@ -106,21 +143,26 @@ public class Map implements Runnable{
 		}
 	}
 
+
+
     //Returns the value inside a given point
     public boolean isValidForward(Point2D point, boolean axe) {
-		if (map.contains(point) {
-		    if (map.get(point) == " ") {
+		if (map.contains(point)) {
+		    if (map.get(point).equals(' ')) {
 		        return true;
 		    } else if (map.get(point) == 'T' && axe) {
 		    	return true;
 		    }
 		    return false;
+    	}
+    	return false;
     }
 
-	/*public static void main(String[] args)
+	public static void main(String[] args)
 	{
 		Map map = new Map();
 		map.run();
 	}
-    */
+    
 }
+
