@@ -11,7 +11,13 @@ import java.net.*;
 
 public class Agent {
 
-   public char get_action( char view[][], State curState ) {
+    private static State curState;
+
+    public Agent() {
+        curState = new State();
+    }
+
+    public char get_action( char view[][] ) {
         
       // Move temp = curState.makeMove();
       //return temp.getMove();
@@ -30,8 +36,9 @@ public class Agent {
             switch( ch ) { // if character is a valid action, return it
             case 'F': case 'L': case 'R': case 'C': case 'B':
             case 'f': case 'l': case 'r': case 'c': case 'b':
+                
                 //Make a new move and update the state
-                Move temp = new Move(ch);
+                Move temp = new Move((char)ch);
                 curState.adjustState(temp);
                 return((char) ch );
             }
@@ -40,7 +47,8 @@ public class Agent {
       catch (IOException e) {
          System.out.println ("IO error:" + e );
       }
-    
+        assert(false); //Should never get to here, panic
+        return 'f';  
    }
 
    void print_view( char view[][] )
@@ -74,7 +82,7 @@ public class Agent {
       int port;
       int ch;
       int i,j;
-      State curState = new State();
+
 
       if( args.length < 2 ) {
          System.out.println("Usage: java Agent -p <port>\n");
@@ -113,7 +121,7 @@ public class Agent {
 
             curState.updateCurMap(view);
 
-            action = agent.get_action( view, curState );
+            action = agent.get_action( view );
             
             out.write( action ); //Don't touch this line
          }

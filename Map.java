@@ -162,43 +162,42 @@ public class Map implements Runnable{
 			System.out.println("");
 		}
 	}
-/*
+
 	// Determines if we can reach te gold.
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
     // Updates the moves queue.
-    private LinkedList<char> isGoldReachable(Point2D.Double currLoc) {
+    public LinkedList<Character> isGoldReachable(Point2D.Double currLoc) {
     	// A* search through known parts of the map 
 
-
+        return null;
     }
     
     // Determines whether or not we can get to some dynamite.
     // We place restrictions on using dynamite to get to it for now. This might be a mistake TODO
     // Updates the moves queue.
-    private boolean isDynamiteReachable() 
-
+    public boolean isDynamiteReachable() { 
+        return false;
     }
 
     // Determines whether or not the axe is reachable. 
     // We place on restrictions on using dynamite to get to it. This might be a mistake TODO
     // Updates the moves queue.
-    private boolean isAxeReachable(){
-        if (axe){
-            return false;
-        }
+    public boolean isAxeReachable(){
+        
+        return false;
     } 
 
     // Determines whether or not the current "space" is explored.
     // In the case of a maze like arena, this returns true if each branch is explored without having
      // to cut anything down or blow anything up.
     // Updates the moves queue.
-    private boolean isExplored() {
+    public boolean isExplored() {
 
-
+        return false;
     }
 
-*/
+
     // Determines whether a space is empty
     public boolean isEmptySpace(Point2D point, boolean axe) {
 		if (map.contains(point)) {

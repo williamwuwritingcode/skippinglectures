@@ -7,7 +7,7 @@ public class Move {
         this.move = move;
     }
     
-    public Move getMove() {
+    public char getMove() {
         return move;
     }
 }
