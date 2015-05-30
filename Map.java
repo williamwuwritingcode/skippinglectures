@@ -145,8 +145,8 @@ public class Map implements Runnable{
 
 
 
-    //Returns the value inside a given point
-    public boolean isValidForward(Point2D point, boolean axe) {
+    // Determines whether a space is empty
+    public boolean isEmptySpace(Point2D point, boolean axe) {
 		if (map.contains(point)) {
 		    if (map.get(point).equals(' ')) {
 		        return true;
@@ -163,6 +163,28 @@ public class Map implements Runnable{
 		Map map = new Map();
 		map.run();
 	}
+   
+    //Removes a wall/tree using dynamite
+    public void blow(Point2D point) {
+        if (map.get(point) == 'T' || map.get(point) == '*') {
+            map.put(point, ' ');
+        } 
+    }
     
+    //Removes a wall using axe
+    public void chop(Point2D point) {
+        if (map.get(point) == 'T') {
+            map.put(point, ' ');
+        }
+    }
+
+
+
+
+
+
+
+
+
 }
 

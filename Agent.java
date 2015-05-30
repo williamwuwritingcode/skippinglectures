@@ -111,16 +111,10 @@ public class Agent {
 
             agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
 
-
-            Double x = curState.getCurX();
-            Double y = curState.getCurY();
-            int dir = curState.getDirection();
-            curState.curMap.updateMap(view, x, y, dir);
-            //agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
+            curState.updateCurMap(view);
 
             action = agent.get_action( view, curState );
             
-
             out.write( action ); //Don't touch this line
          }
       }
