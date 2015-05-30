@@ -172,4 +172,11 @@ public class State {
         assert(direction > 0 && direction < 5); //Sanity Check
         return;
     }
-}    
+}
+
+public int getDirection() {
+    return direction;
+}
+
+
+
