@@ -168,32 +168,32 @@ public class Map implements Runnable{
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
     // Updates the moves queue.
-    private LinkedList<char> isGoldReachable(Point2D.Double currLoc) {
+    public LinkedList<Character> isGoldReachable(Point2D.Double currLoc) {
     	// A* search through known parts of the map 
 
-
+        return null;
     }
     
     // Determines whether or not we can get to some dynamite.
     // We place restrictions on using dynamite to get to it for now. This might be a mistake TODO
     // Updates the moves queue.
-    private boolean isDynamiteReachable() 
-
+    public boolean isDynamiteReachable() { 
+        return false;
     }
 
     // Determines whether or not the axe is reachable. 
     // We place on restrictions on using dynamite to get to it. This might be a mistake TODO
     // Updates the moves queue.
-    private boolean isAxeReachable(){
-        if (axe){
-            return false;
-        }
+    public boolean isAxeReachable(){
+        
+        return false;
     } 
 
     // Determines whether or not the current "space" is explored.
     // In the case of a maze like arena, this returns true if each branch is explored without having
      // to cut anything down or blow anything up.
     // Updates the moves queue.
+<<<<<<< HEAD
     private LinkedList<Move> isExplored(Point2D.Double currLoc) {
     	//bfs to find if any border points are free to move in w/o the
     	//use of axe, dynamite or boat
@@ -204,9 +204,17 @@ public class Map implements Runnable{
     	}
     	//check if there is a space there
    		//add it to the queue
+=======
+    public boolean isExplored() {
+>>>>>>> 7d1a1a908dc21662dcb6ce4d1026bad14b0b8c0c
 
+        return false;
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7d1a1a908dc21662dcb6ce4d1026bad14b0b8c0c
     // Determines whether a space is empty
     public boolean isEmptySpace(Point2D point, boolean axe) {
 		if (map.contains(point)) {
