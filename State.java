@@ -10,7 +10,7 @@ public class State {
     private int dynamite; // Determines how many dynamites we have
     private Point2D.Double curLocation; // Current Location
     private Stack unexplored; // ?
-    private Queue movesToDo; // Current queue of moves to be executed. This is automic.   
+    private Queue<Move> movesToDo; // Current queue of moves to be executed. This is automic.   
     private int direction; //(used as an enum: 1 = up, 2 = right, 3 = down, 4 = left (clockwise from up position));
     
     public State(){

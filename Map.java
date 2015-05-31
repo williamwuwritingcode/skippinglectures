@@ -2,7 +2,6 @@ import java.util.Hashtable;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.io.*;
-import java.
 
 public class Map implements Runnable{
 
@@ -193,28 +192,21 @@ public class Map implements Runnable{
     // In the case of a maze like arena, this returns true if each branch is explored without having
      // to cut anything down or blow anything up.
     // Updates the moves queue.
-<<<<<<< HEAD
-    private LinkedList<Move> isExplored(Point2D.Double currLoc) {
+    public LinkedList<Move> isExplored(Point2D.Double currLoc) {
     	//bfs to find if any border points are free to move in w/o the
     	//use of axe, dynamite or boat
-    	Queue<LinkedList<Point2D>> nextPath = new Queue<LinkedList<Point2D>>();
+    	//Queue<LinkedList<Point2D>> nextPath = new Queue<LinkedList<Point2D>>();
     	// for the points around currLoc
     	for(int i = 0; i < 4; i++){
     		
     	}
-    	//check if there is a space there
-   		//add it to the queue
-=======
-    public boolean isExplored() {
->>>>>>> 7d1a1a908dc21662dcb6ce4d1026bad14b0b8c0c
-
-        return false;
+        return null;
     }
 
-<<<<<<< HEAD
-=======
+    public boolean isExplored(){
+    	return false;
+    }
 
->>>>>>> 7d1a1a908dc21662dcb6ce4d1026bad14b0b8c0c
     // Determines whether a space is empty
     public boolean isEmptySpace(Point2D point, boolean axe) {
 		if (map.contains(point)) {
