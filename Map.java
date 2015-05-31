@@ -2,6 +2,7 @@ import java.util.Hashtable;
 import java.awt.geom.Point2D;
 import java.util.LinkedList;
 import java.io.*;
+import java.
 
 public class Map implements Runnable{
 
@@ -162,7 +163,7 @@ public class Map implements Runnable{
 			System.out.println("");
 		}
 	}
-/*
+
 	// Determines if we can reach te gold.
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
@@ -193,12 +194,19 @@ public class Map implements Runnable{
     // In the case of a maze like arena, this returns true if each branch is explored without having
      // to cut anything down or blow anything up.
     // Updates the moves queue.
-    private boolean isExplored() {
-
+    private LinkedList<Move> isExplored(Point2D.Double currLoc) {
+    	//bfs to find if any border points are free to move in w/o the
+    	//use of axe, dynamite or boat
+    	Queue<LinkedList<Point2D>> nextPath = new Queue<LinkedList<Point2D>>();
+    	// for the points around currLoc
+    	for(int i = 0; i < 4; i++){
+    		
+    	}
+    	//check if there is a space there
+   		//add it to the queue
 
     }
 
-*/
     // Determines whether a space is empty
     public boolean isEmptySpace(Point2D point, boolean axe) {
 		if (map.contains(point)) {
@@ -212,11 +220,11 @@ public class Map implements Runnable{
     	return false;
     }
 
-	public static void main(String[] args)
+	/*public static void main(String[] args)
 	{
 		Map map = new Map();
 		map.run();
-	}
+	}*/
    
     //Removes a wall/tree using dynamite
     public void blow(Point2D.Double point) {
