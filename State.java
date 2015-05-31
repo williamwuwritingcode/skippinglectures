@@ -15,7 +15,7 @@ public class State {
     
     public State(){
     	curMap = new Map();
-        direction = 0;
+        direction = 1;
         curLocation = new Point2D.Double(0,0);
         dynamite = 0;
         axe = false;
@@ -30,7 +30,6 @@ public class State {
         
         //Get location in front
         Point2D.Double inFront = getPointInFront();
-
         switch (thing.getMove()) {
         
         //Case of turning right
@@ -53,8 +52,20 @@ public class State {
 		
 		//Case of trying to move forward	
         case 'f': case 'F':
-           curLocation = inFront;
+           
+           // See if forward move is valid. Not actually required when we run the AI since it does 
+           // this check anyway but eh
+           if (curMap.isEmptySpace(inFront, false)) {
+                curLocation = inFront;
+           }
             
+           // See if we picked up an axe or dynamite
+           if (curMap.acquireDynamite(inFront)) {
+                dynamite++;                  
+           } else if (curMap.acquireAxe(inFront)) {
+                axe = true;
+           }
+
            break; 
         
         //Case of trying to chop down	
@@ -79,6 +90,11 @@ public class State {
         //Print the map
         curMap.printMap();
         
+        //Print out the state information
+        System.out.println("Direction is: " + direction);
+        System.out.println(dynamite + " dynamite");
+        System.out.println("curLocation is (" + curLocation.getX() + ", " + (int)curLocation.getY() + ")");
+
         return;
     }
 
@@ -182,21 +198,22 @@ public class State {
         Point2D.Double forwardPoint = null;        
         switch (direction) {
         case 1:
-            forwardPoint = new Point2D.Double(curLocation.getX(), curLocation.getY() + 1);
+            forwardPoint = new Point2D.Double((int) curLocation.getX(),(int) (curLocation.getY() + 1));
             break;
         case 2:
-            forwardPoint = new Point2D.Double(curLocation.getX() + 1, curLocation.getY()); 
+            forwardPoint = new Point2D.Double((int)(curLocation.getX() + 1), (int) curLocation.getY()); 
             break;
         case 3:
-            forwardPoint = new Point2D.Double(curLocation.getX(), curLocation.getY() - 1); 
+            forwardPoint = new Point2D.Double((int) curLocation.getX(),(int) ( curLocation.getY() - 1)); 
             break;
         case 4:
-            forwardPoint = new Point2D.Double(curLocation.getX() - 1, curLocation.getY()); 
+            forwardPoint = new Point2D.Double((int)(curLocation.getX() - 1),(int) curLocation.getY()); 
             break;
         default:
             assert(false); //Error if it gets to here - Sanity Check
             break;
-   	    } 
+   	    }
+
         return forwardPoint;
     
     }
@@ -252,7 +269,7 @@ public class State {
     // Updates the moves queue.
     private boolean canMoveForward() {
         
-        Point2D forwardPoint = getPointInFront();
+        Point2D.Double forwardPoint = getPointInFront();
 
         // Send in empty because we don't want to consider using an axe in this case
         if (curMap.isEmptySpace(forwardPoint, false)) { 
@@ -267,8 +284,8 @@ public class State {
     private void rotateToAppropriateOrientation() {
         
         // go left then right -< arbitrarily assigned.
-        Point2D left = getPointToLeft();
-        Point2D right = getPointToRight(); 
+        Point2D.Double left = getPointToLeft();
+        Point2D.Double right = getPointToRight(); 
 
         if (curMap.isEmptySpace(left, false)) {
             movesToDo.add(new Move('L'));

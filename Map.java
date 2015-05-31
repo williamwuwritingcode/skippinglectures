@@ -77,11 +77,31 @@ public class Map implements Runnable{
 	{
 		return map;
 	}
+    
 
+    public boolean acquireDynamite(Point2D.Double check) {
+        char temp;
+        temp = map.get(check);
+        if (temp == 'd') {         
+            return true;
+        }
+        return false;
+    }
+
+    public boolean acquireAxe(Point2D.Double check) {
+        char temp;
+        temp = map.get(check);
+        if (temp == 'a') {         
+            return true;
+        }
+        return false;
+    }
+
+    
 	//updates map for the new view given by the agent. 
 	public void updateMap(char[][] view, int x, int y, int dir)
 	{
-		boolean coordsOpposite = false;
+		/*boolean coordsOpposite = false;
 		int xdir = 1; 
 		int ydir = -1;
 
@@ -105,10 +125,10 @@ public class Map implements Runnable{
 
 		for (int row = 0; row < 5; row++){
 			for (int col = 0; col < 5; col++){
+                if (row == 2 && col == 2) continue;
 				int xGlobal = x + (col-2)*xdir;
 				int yGlobal = y + (row-2)*ydir;
 				Point2D.Double point = new Point2D.Double(xGlobal,yGlobal);
-
 				char thing;
 		 		if(!coordsOpposite){
 		 			thing = view[row][col];
@@ -116,10 +136,46 @@ public class Map implements Runnable{
 		 		{
 		 			thing = view[col][row];
 		 		}
-
+                System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
 		 		updateMapPoint(point, thing);
 			}
-		}
+		}*/
+
+        for (int row = -2; row < 3; row++){
+		    for (int col = -2; col < 3; col++){
+                if (row == 0 && col == 0) continue;
+                
+                Point2D.Double point = null;
+                char thing = 't';
+
+                switch (dir) {
+                    case NORTH:
+                        point = new Point2D.Double(x - row, y + col);
+                        
+                        break;
+
+                    case EAST:
+                        point = new Point2D.Double(y - row, x - col);
+                        
+                        break;
+
+                    case SOUTH:
+                        point = new Point2D.Double(x + row, y - col);
+    
+                        break;
+
+                    case WEST:
+                        point = new Point2D.Double(y - row, x - col);
+                
+                        break;        
+                }
+                
+                thing = view[row+2][col+2];
+                System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
+                updateMapPoint(point, thing);
+
+            }
+        }
 	}
 
 	//Updates one point on the map at a time
@@ -152,11 +208,12 @@ public class Map implements Runnable{
 	//prints the current map
 	public void printMap()
 	{
-		for(int y = (int)bottomRight.getY(); y <= topLeft.getY(); y++)
+		for(int y = (int)topLeft.getY(); y <= bottomRight.getY(); y--)
 		{
 			for(int x = (int)topLeft.getX(); x <= bottomRight.getX(); x++)
 			{
-				Point2D.Double currentPos = new Point2D.Double(x, y);
+		
+                Point2D.Double currentPos = new Point2D.Double(x, y);
 				Character thing = map.get(currentPos);
 				if(thing == null)
 					System.out.print("?");
@@ -211,10 +268,14 @@ public class Map implements Runnable{
     public boolean isExplored(){return false;};
 
     // Determines whether a space is empty
-    public boolean isEmptySpace(Point2D point, boolean axe) {
-		if (map.contains(point)) {
-		    if (map.get(point).equals(' ')) {
-		        return true;
+    public boolean isEmptySpace(Point2D.Double point, boolean axe) {
+		if (map.containsKey(point)) {
+            
+            System.out.println("Contains " + point.getX() + " " + point.getY());
+            char temp = map.get(point);
+		    if (temp == ' ' || temp  == 'e'|| temp == 'a' || temp == 'd') { 
+                System.out.println("Returning true " + temp + "yolo");
+                return true;
 		    } else if (map.get(point) == 'T' && axe) {
 		    	return true;
 		    }
