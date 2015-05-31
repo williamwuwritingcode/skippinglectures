@@ -1,4 +1,5 @@
-ublic class Search{
+/*
+Public class Search{
 	private Hashtable<Point2D.Double, Character> map;
 
 	public void Search(Hashtable<Point2D.Double, Character> map)
@@ -52,3 +53,4 @@ ublic class Search{
     }
 
 }
+*/

@@ -15,7 +15,7 @@ public class State {
     
     public State(){
     	curMap = new Map();
-        direction = 0;
+        direction = 1;
         curLocation = new Point2D.Double(0,0);
         dynamite = 0;
         axe = false;
@@ -79,6 +79,11 @@ public class State {
         //Print the map
         curMap.printMap();
         
+        //Print out the state information
+        System.out.println("Direction is: " + direction);
+        System.out.println(dynamite + " dynamite");
+        System.out.println("curLocation is (" + curLocation.getX() + ", " + (int)curLocation.getY() + ")");
+
         return;
     }
 
