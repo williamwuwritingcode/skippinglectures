@@ -1,0 +1,35 @@
+Should add a separate class for search
+
+Will hold a map that knows where has and hasn't been searched. Will look like: 
+
+Before tree cut down:
+-----------------------------------------
+|~~~~~~~~******~~~~~~~~~~~~~~~~~~~~~~~~~|
+|~~~~~~   Teeeee~~~~~~~~~~~~~~~~~~~~~~~~|
+|~~~~~    Teeeeeee~~~~~~~~~~~~~~~~~~~~~~|
+|~~~     **eeeeeeeeeeeee~~~~~~~~~~~~~~~~|
+|~~       *eeee~~~~~~~~~~~~~~~~~~~~~~~~~|
+-----------------------------------------
+
+After tree cut down: (means we wont check the place with e's when looking if isexplored is true)
+-----------------------------------------
+|~~~~~~~~******~~~~~~~~~~~~~~~~~~~~~~~~~|
+|~~~~~~   eeeeee~~~~~~~~~~~~~~~~~~~~~~~~|
+|~~~~~    Teeeeeee~~~~~~~~~~~~~~~~~~~~~~|
+|~~~     **eeeeeeeeeeeee~~~~~~~~~~~~~~~~|
+|~~       *eeee~~~~~~~~~~~~~~~~~~~~~~~~~|
+-----------------------------------------
+
+Holds a boolean that holds the last result of the function call, if true don't
+actually search map until an action happens such as: tree cut, dynamite.
+
+isExplored function can be extended to question the two things on each side of the explored area, so in this case when gold hasn't been found we use the key (z?) to be explored water. 
+
+-----------------------------------------
+|~~~~~~~~******zz~~~~~~~~~~~~~~~~~~~~~~~|
+|~~~~~~   Teeeeezz~~~~~~~~~~~~~~~~~~~~~~|
+|~~~~~    Teeeeeeezz~~~~~~~~~~~~~~~~~~~~|
+|~~~     **eeeeeeeeeeeeezz~~~~~~~~~~~~~~|
+|~~       *eeeezz~~~~~~~~~~~~~~~~~~~~~~~|
+-----------------------------------------
+

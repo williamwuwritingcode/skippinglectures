@@ -10,8 +10,8 @@ public class Map implements Runnable{
 	private Point2D.Double goldLocation;
 	private LinkedList<Point2D.Double> dynamiteLocations;
 	private LinkedList<Point2D.Double> axeLocations;
-	private LinkedList<Point2D.Double> boatLocations;
-	
+	private LinkedList<Point2D.Double> boatLocations; 
+
 	//these save bounds of the map
 	private Point2D.Double topLeft;
 	private Point2D.Double bottomRight;
@@ -21,6 +21,9 @@ public class Map implements Runnable{
 	private static final int EAST = 2;
 	private static final int SOUTH = 3;
 	private static final int WEST = 4;
+
+	//add this to search class
+	private boolean adjExplored = false;
 
 	public Map()
 	{
@@ -45,21 +48,11 @@ public class Map implements Runnable{
 			{'~', '~', '~', ' ', '~'}	 
 		};
 
-		System.out.println("NORTH");
+		System.out.println("MAP");
 		updateMap( view, 0, 0, NORTH);
 		printMap();
 
-		System.out.println("EAST");
-		updateMap( view, 0, 0, EAST);
-		printMap();
-
-		System.out.println("SOUTH");
-		updateMap( view, 0, 0, SOUTH);
-		printMap();
-
-		System.out.println("WEST");
-		updateMap( view, 0, 0, WEST);
-		printMap();
+		isExplored(new Point2D.Double(0, 0));
 	}
 
 
@@ -189,7 +182,7 @@ public class Map implements Runnable{
 
     // Determines whether or not the current "space" is explored.
     // In the case of a maze like arena, this returns true if each branch is explored without having
-     // to cut anything down or blow anything up.
+    // to cut anything down or blow anything up.
     // Updates the moves queue.
     public LinkedList<Move> isExplored(Point2D.Double currLoc) {
     	//bfs to find if any border points are free to move in w/o the
@@ -209,20 +202,25 @@ public class Map implements Runnable{
     		LinkedList<Point2D.Double> path = nextPathQueue.remove();
     		Point2D.Double point = path.getLast();
 
-    		//check if the adjacent points have been explored
-    		Boolean adjacentExplored = new Boolean(false);
-    		LinkedList<Point2D.Double> nextPoints = areAdjecentExplored(point, adjacentExplored);
+    		System.out.println("Exploring point: " + point);
 
-	    	if(!adjacentExplored){
+    		//check if the adjacent points have been explored
+    		adjExplored = false;
+    		LinkedList<Point2D.Double> nextPoints = areAdjacentExplored(point);
+
+	    	if(!adjExplored && (nextPoints != null)){
 	    		//check areAdjecentExplored returned the expected
-	    		if(pathToUnexplored.size() == 1){ 
+	    		if(nextPoints.size() == 1){ 
 	    			path.add(nextPoints.getFirst());
 	    			pathToUnexplored = path;
-	    		}else{ 
+	    			System.out.println("\tAdjacent unexplored was found at point: " + nextPoints.getFirst());
+	    		}else if (nextPoints.size() > 1){ 
 	    			System.out.println("areAdjacentExplored returned more than one value for adjecentExplored = false");
+	    		}else{
+	    			System.out.println("areAdjacentExplored did not return a point for adjacentExplored = false");
 	    		}
 
-	    		//Break out of loop since an unexploted location has been found
+	    		//Break out of loop since an unexplored location has been found
 	    		break; 
 	    	}else{
 	    		//add the points that can be visited next to the current path and add to the queue
@@ -231,6 +229,7 @@ public class Map implements Runnable{
 	    			LinkedList<Point2D.Double> newPath = (LinkedList)(path.clone());
 	    			newPath.addLast(nextPoints.get(i));
 	    			nextPathQueue.add(newPath);
+	    			System.out.println("\tPoint added to next path: "+ nextPoints.get(i));
 	    		}
 	    	}
     	}	
@@ -239,6 +238,9 @@ public class Map implements Runnable{
     	if(pathToUnexplored!=null){
     		int orientation = NORTH; //FIX THIS
     		movesToUnexplored = changePathToMoves(pathToUnexplored, orientation);
+    		System.out.println("The map was not explored!");
+    	}else{
+    		System.out.println("The map has been explored");
     	}
 
     	//return the linked list that this class passes back
@@ -262,11 +264,11 @@ public class Map implements Runnable{
     	return false;
     }
 
-	/*public static void main(String[] args)
+	public static void main(String[] args)
 	{
 		Map map = new Map();
 		map.run();
-	}*/
+	}
    
     //Removes a wall/tree using dynamite
     public void blow(Point2D.Double point) {
@@ -290,9 +292,10 @@ public class Map implements Runnable{
     // 					  that are moveable to
     //				- areThey == false returns a linked list of the first point found 
     // 					  point that is unexplored. 
-    //NB: Currently prefer north, then east, south, west. 
-    private LinkedList<Point2D.Double> areAdjecentExplored(Point2D.Double currLoc, Boolean areThey)
+    //NB: Currently prefers north, then east, south, west. 
+    private LinkedList<Point2D.Double> areAdjacentExplored(Point2D.Double currLoc)
     {
+    	System.out.println("areAdjacentExplored");
     	LinkedList<Point2D.Double> unexploredPoint = new LinkedList<Point2D.Double>();
     	LinkedList<Point2D.Double> nextPointsToVisit = new LinkedList<Point2D.Double>();
 
@@ -308,15 +311,19 @@ public class Map implements Runnable{
 	    	Character value = map.get(p[i]); 
 	    	if(value == null){
 	    		unexploredPoint.add(p[i]);
-	    		areThey = false;
+	    		adjExplored = false;
+	    		System.out.println("\tUnexplored Point: " + p[i]);
 	    		return unexploredPoint; 
-	    	} else if (value == ' '){
+	    	} else if ((value == ' ') || (value == 'a') || (value == 'd')){
 	    		nextPointsToVisit.add(p[i]);
+	    		System.out.println("\tPoints to visit next: " + p[i]);
+	    	} else {
+	    		System.out.println("\tCan't move to point: " + p[i]);
 	    	}
 	    }
 
-	    //if program reaces here, all points must have been explored
-	   	areThey = true;
+	    //if program reaches here, all points must have been explored
+	   	adjExplored = true; System.out.println("\tChanged areThey to true");
 	   	return nextPointsToVisit;
     }
 
