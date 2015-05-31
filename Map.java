@@ -1,7 +1,7 @@
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
-
+import java.lang.Math;
 public class Map implements Runnable{
 
 	private Hashtable<Point2D.Double, Character> map;
@@ -99,7 +99,7 @@ public class Map implements Runnable{
 
     
 	//updates map for the new view given by the agent. 
-	public void updateMap(char[][] view, int x, int y, int dir)
+	public void updateMap(char[][] view, int inx, int iny, int dir)
 	{
 		/*boolean coordsOpposite = false;
 		int xdir = 1; 
@@ -136,11 +136,11 @@ public class Map implements Runnable{
 		 		{
 		 			thing = view[col][row];
 		 		}
-                System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
+                //System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
 		 		updateMapPoint(point, thing);
 			}
 		}*/
-
+/*
         for (int row = -2; row < 3; row++){
 		    for (int col = -2; col < 3; col++){
                 if (row == 0 && col == 0) continue;
@@ -150,32 +150,80 @@ public class Map implements Runnable{
 
                 switch (dir) {
                     case NORTH:
-                        point = new Point2D.Double(x - row, y + col);
+                        point = new Point2D.Double(x + col, y - row);
                         
                         break;
 
                     case EAST:
-                        point = new Point2D.Double(y - row, x - col);
+                        point = new Point2D.Double(y - col, x - row);
                         
                         break;
 
                     case SOUTH:
-                        point = new Point2D.Double(x + row, y - col);
+                        point = new Point2D.Double(x + col, y - row);
     
                         break;
 
                     case WEST:
-                        point = new Point2D.Double(y - row, x - col);
+                        point = new Point2D.Double(y - col, x - row);
                 
                         break;        
                 }
                 
-                thing = view[row+2][col+2];
-                System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
+                thing = view[col+2][row+2];
+                //System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
                 updateMapPoint(point, thing);
 
             }
+        }*/
+
+        Point2D.Double currPos = new Point2D.Double(inx, iny);
+
+        for(int x = 0; x < 5;x++){
+        	double xGlobal = 0;
+        	double yGlobal = 0;
+             for(int y = 0; y < 5; y++)
+        	{
+        		switch (dir){
+		        	case NORTH:
+		        		xGlobal = currPos.getX()+(x - 2);
+		        		yGlobal = currPos.getY()+(2 - y);
+		        		break; 
+		        	case SOUTH:
+		        		xGlobal = currPos.getX()+(2 - x);
+		        		yGlobal = currPos.getY()+(y - 2);
+		        		break;
+		        	case EAST:
+		        		yGlobal = currPos.getY()+(2 - x);
+		        		xGlobal = currPos.getX()+(2 - y);
+		        		break;
+		        	case WEST:
+		        		yGlobal = currPos.getY()+(x - 2);
+		        		xGlobal = currPos.getX()+(y - 2);
+		        		break;
+		        	default: 
+		        		assert(false);
+		        		break;
+        		}
+
+	        	char thing = view[y][x];
+	        	Point2D.Double point = new Point2D.Double(xGlobal, yGlobal);
+	        	map.put(point ,thing);
+
+	        	
+	        	if(xGlobal < topLeft.getX())
+	        		topLeft = new Point2D.Double(xGlobal, topLeft.getY());
+	        	else if(xGlobal > bottomRight.getX())
+	        		bottomRight = new Point2D.Double(yGlobal, bottomRight.getY());
+
+	        	if(yGlobal > topLeft.getY())
+	        		topLeft = new Point2D.Double(topLeft.getX(), yGlobal);
+	        	else if(yGlobal < bottomRight.getY())
+	        		bottomRight = new Point2D.Double(bottomRight.getX(), yGlobal);
+        	}
         }
+
+        printMap();
 	}
 
 	//Updates one point on the map at a time
@@ -208,11 +256,24 @@ public class Map implements Runnable{
 	//prints the current map
 	public void printMap()
 	{
+<<<<<<< HEAD
 		for(int y = (int)topLeft.getY(); y >= bottomRight.getY(); y--)
 		{
+=======
+		//print out x coordinate system
+		System.out.print(" ");
+		for(int x = (int)topLeft.getX(); x <= (int)bottomRight.getX(); x++){
+			System.out.print(Math.abs(x));
+		}
+			
+		System.out.println("");
+
+		for(int y = (int)topLeft.getY(); y >= bottomRight.getY(); y--)
+		{	
+			System.out.print(Math.abs(y));
+>>>>>>> a62ce744716c74842913424d9a9dc17134eaf945
 			for(int x = (int)topLeft.getX(); x <= bottomRight.getX(); x++)
 			{
-		
                 Point2D.Double currentPos = new Point2D.Double(x, y);
 				Character thing = map.get(currentPos);
 				if(thing == null)
