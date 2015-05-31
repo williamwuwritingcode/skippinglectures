@@ -23,13 +23,22 @@ public class Map implements Runnable{
 	private static final int SOUTH = 3;
 	private static final int WEST = 4;
 
+	//tools
+	public static final int AXE = 0;
+	public static final int DYNAMITE = 1;
+	public static final int BOAT = 2;
+
 
 	public Map()
 	{
 		this.map = new Hashtable<Point2D.Double, Character>();
-		//this.search = new Search(map);
 		this.topLeft = new Point2D.Double(0, 0);
 		this.bottomRight = new Point2D.Double(0, 0);
+
+		Hashtable<Point2D.Double, Character> searchMap = (Hashtable<Point2D.Double, Character>)map.clone();
+		Point2D.Double searchTl = (Point2D.Double) topLeft.clone();
+		Point2D.Double searchBr = (Point2D.Double) bottomRight.clone();
+		this.search = new Search(searchMap, searchTl, searchBr);
 		
 		this.goldLocation = null;
 		this.dynamiteLocations = new LinkedList<Point2D.Double>();
@@ -52,7 +61,10 @@ public class Map implements Runnable{
 		updateMap( view, 0, 0, NORTH);
 		printMap();
 
-		isExplored(new Point2D.Double(0, 0));
+		isExplored(new Point2D.Double(0, 0), NORTH);
+
+		int items[] = {0, 0, 0, 0};
+		search.isPointReachable(new Point2D.Double(2, 0), new Point2D.Double(0, 0), NORTH, items);
 	}
 
 
@@ -175,15 +187,25 @@ public class Map implements Runnable{
     // Determines whether or not the axe is reachable. 
     // We place on restrictions on using dynamite to get to it. This might be a mistake TODO
     // Updates the moves queue.
-    public boolean isAxeReachable(){
-        
-        return false;
+    public LinkedList<Move> isAxeReachable(Point2D.Double currLoc, int direction, int[] useableItems){
+
+        return null;
     } 
 
-    public LinkedList<Move> isExplored(Point2D.Double currLoc){
-    	
+    //Given the current location checks to see if the entirereachable area has been 
+    //explored. The reachable area is defined as everywhere reachable from the current 
+    // location without using any tools.
+    //returns:  - null if the area has been explored
+    //			- a linked list of moves to get to the closest unexplored area.
+    public LinkedList<Move> isExplored(Point2D.Double currLoc, int orientation){
+		search.updateMap(map, topLeft, bottomRight);
+		LinkedList<Point2D.Double> pathToUnexplored = search.isExplored(currLoc);
 
-    	return null;
+		LinkedList<Move> movesToUnexplored = null;
+		if(pathToUnexplored!= null)
+			movesToUnexplored = changePathToMoves(pathToUnexplored, orientation);
+
+    	return movesToUnexplored;
     }
 
     public boolean isExplored(){return false;};
