@@ -208,7 +208,7 @@ public class Map implements Runnable{
 	//prints the current map
 	public void printMap()
 	{
-		for(int y = (int)topLeft.getY(); y <= bottomRight.getY(); y--)
+		for(int y = (int)topLeft.getY(); y >= bottomRight.getY(); y--)
 		{
 			for(int x = (int)topLeft.getX(); x <= bottomRight.getX(); x++)
 			{

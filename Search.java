@@ -75,33 +75,37 @@ public class Search{
 
 		//should update map to hold values where question marks used to be, but 
 		//not override areas we have explored
-		for(double row = br.y; row < tl.y; row++)
+		for(double row = br.getY(); row <= tl.getY(); row++)
 		{
-			for(double col = tl.x; col < br.x; col++)
+			for(double col = tl.getX(); col <= br.getX(); col++)
 			{
 				Point2D.Double loc = new Point2D.Double(col, row);
 				//the values at this point in both the maps
 				Character new_thing = newMap.get(loc);
-				Character old_thing = map.get(loc);
+                Character old_thing = map.get(loc);
 				
 				//check if the point on the map is explored and new thing is not a boat.
 				//In this case we don't want to update the point.
 				boolean isExplored = false;
-				if(old_thing != null){
-					if((old_thing == 'e') && (new_thing != 'B'))
+				
+                if(old_thing != null){
+					if((old_thing == 'e') && (new_thing != 'B')){
 						isExplored = true;
+                    }
 				}
 
-				if((new_thing != null))
+				if((new_thing != null)) {
 					//check if old thing is not 'e'
 					map.put(loc, new_thing);
-				else
-					System.out.println("Everything was null!");
+                } else {
+					System.out.println("Everything was null! (for " + loc + " )");
+                }
 			}
 		}
 
 		System.out.println("Updated Search Map");
 		printMap();
+        System.out.println("Returning from updateMap");
 	}
 
 	//Determines whether a point is reachable given a current location and an array of things it's 
@@ -362,7 +366,7 @@ public class Search{
     //prints the current map
 	public void printMap()
 	{
-		for(int y = (int)topLeft.getY(); y <= bottomRight.getY(); y++)
+		for(int y = (int)topLeft.getY(); y >= bottomRight.getY(); y--)
 		{
 			for(int x = (int)topLeft.getX(); x <= bottomRight.getX(); x++)
 			{
