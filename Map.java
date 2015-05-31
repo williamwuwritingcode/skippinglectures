@@ -249,6 +249,11 @@ public class Map implements Runnable{
         return null;
     } 
 
+    public boolean isAxeReachable()
+    {
+    	return false;
+    }
+
     //Given the current location checks to see if the entirereachable area has been 
     //explored. The reachable area is defined as everywhere reachable from the current 
     // location without using any tools.
