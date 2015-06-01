@@ -19,9 +19,9 @@ public class Agent {
 
     public char get_action( char view[][] ) {
         
-      // Move temp = curState.makeMove();
-      //return temp.getMove();
-
+      Move temp = curState.makeMove();
+      return temp.getMove();
+/*
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
 
       int ch=0;
@@ -48,7 +48,7 @@ public class Agent {
          System.out.println ("IO error:" + e );
       }
         assert(false); //Should never get to here, panic
-        return 'f';  
+        return 'f';  */
    }
 
    void print_view( char view[][] )

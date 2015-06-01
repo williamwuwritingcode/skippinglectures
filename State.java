@@ -152,19 +152,36 @@ public class State {
         return temp;
 
     }
-/*
+
+
     // Determines if we can reach te gold.
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
     // Updates the moves queue.
-    //private boolean isGoldReachable() {
+    private boolean isGoldReachable() {
+        
+        // If we haven't found gold yet, no point searching for it.
+        Point2D.Double gold = curMap.getGoldLocation();
+        if (gold == null) return false;
 
-    //}
+        LinkedList<Move> moves = curMap.isGoldReachable(orientation, curLocation);
+        if (moves == null) {
+            return false;
+        } else {
+            while (moves.size() > 0) {
+                Move temp = moves.remove();
+                movesToDo.add(temp);
+            }
+        }
+
+    }
     
     // Determines whether or not we can get to some dynamite.
     // We place restrictions on using dynamite to get to it for now. This might be a mistake TODO
     // Updates the moves queue.
     private boolean isDynamiteReachable() 
+        
+
 
     }
 
@@ -185,7 +202,7 @@ public class State {
 
 
     }
-*/
+
 
     // Gets the current direction
     public int getDirection() {
@@ -303,6 +320,7 @@ public class State {
     }
 
 }
+
 
 
 

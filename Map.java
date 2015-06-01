@@ -59,16 +59,28 @@ public class Map implements Runnable{
 
 		System.out.println("MAP");
 		updateMap( view, 0, 0, NORTH);
-		printMap();
+//		printMap();
 
 		isExplored(new Point2D.Double(0, 0), NORTH);
 
 		int items[] = {0, 0, 0, 0};
-		search.isPointReachable(new Point2D.Double(2, 0), new Point2D.Double(0, 0), NORTH, items);
+		LinkedList<Point2D.Double> temp = search.isPointReachable(new Point2D.Double(2, 0), new Point2D.Double(0, 0), NORTH, items);
+        LinkedList<Move> temp2 = changePathToMoves(temp, NORTH);
+
+        while (temp2.size() > 0) {
+            Move temp3 = temp2.remove();
+            System.out.print(temp3.getMove() + " ");
+        
+        }
+
+        System.out.println("");
+
+
+
 	}
 
 
-	public Point2D.Double getGoldLocation()
+	public Point2D.Double getGoldLocation()//possibly should be private
 	{
 		return goldLocation;
 	}
@@ -101,89 +113,16 @@ public class Map implements Runnable{
 	//updates map for the new view given by the agent. 
 	public void updateMap(char[][] view, int inx, int iny, int dir)
 	{
-		/*boolean coordsOpposite = false;
-		int xdir = 1; 
-		int ydir = -1;
-
-		switch (dir){
-			case EAST:
-				coordsOpposite = true;
-				xdir = 1;
-				ydir = 1;
-				break;
-			case SOUTH:
-				coordsOpposite = false;
-				xdir = -1; 
-				ydir = 1;
-				break;
-			case WEST:
-				coordsOpposite = true;
-				xdir = -1; 
-				ydir = -1;
-				break;
-		}
-
-		for (int row = 0; row < 5; row++){
-			for (int col = 0; col < 5; col++){
-                if (row == 2 && col == 2) continue;
-				int xGlobal = x + (col-2)*xdir;
-				int yGlobal = y + (row-2)*ydir;
-				Point2D.Double point = new Point2D.Double(xGlobal,yGlobal);
-				char thing;
-		 		if(!coordsOpposite){
-		 			thing = view[row][col];
-		 		} else
-		 		{
-		 			thing = view[col][row];
-		 		}
-                //System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
-		 		updateMapPoint(point, thing);
-			}
-		}*/
-/*
-        for (int row = -2; row < 3; row++){
-		    for (int col = -2; col < 3; col++){
-                if (row == 0 && col == 0) continue;
-                
-                Point2D.Double point = null;
-                char thing = 't';
-
-                switch (dir) {
-                    case NORTH:
-                        point = new Point2D.Double(x + col, y - row);
-                        
-                        break;
-
-                    case EAST:
-                        point = new Point2D.Double(y - col, x - row);
-                        
-                        break;
-
-                    case SOUTH:
-                        point = new Point2D.Double(x + col, y - row);
-    
-                        break;
-
-                    case WEST:
-                        point = new Point2D.Double(y - col, x - row);
-                
-                        break;        
-                }
-                
-                thing = view[col+2][row+2];
-                //System.out.println("Updating " + point.getX() + " " + point.getY() + " with |" + thing + "|");
-                updateMapPoint(point, thing);
-
-            }
-        }*/
-
+        
         Point2D.Double currPos = new Point2D.Double(inx, iny);
 
+        // For each point received
         for(int x = 0; x < 5;x++){
         	double xGlobal = 0;
         	double yGlobal = 0;
              for(int y = 0; y < 5; y++)
         	{
+                // A switch statment that maps relative view index to global index
         		switch (dir){
 		        	case NORTH:
 		        		xGlobal = currPos.getX()+(x - 2);
@@ -206,15 +145,16 @@ public class Map implements Runnable{
 		        		break;
         		}
 
+                // Add the element in at the right coordinate
 	        	char thing = view[y][x];
 	        	Point2D.Double point = new Point2D.Double(xGlobal, yGlobal);
-	        	map.put(point ,thing);
+	        	map.put(point ,thing);         
 
-	        	
+                // Update the top left and bottom right hand corners
 	        	if(xGlobal < topLeft.getX())
 	        		topLeft = new Point2D.Double(xGlobal, topLeft.getY());
 	        	else if(xGlobal > bottomRight.getX())
-	        		bottomRight = new Point2D.Double(yGlobal, bottomRight.getY());
+	        		bottomRight = new Point2D.Double(xGlobal, bottomRight.getY());
 
 	        	if(yGlobal > topLeft.getY())
 	        		topLeft = new Point2D.Double(topLeft.getX(), yGlobal);
@@ -222,7 +162,7 @@ public class Map implements Runnable{
 	        		bottomRight = new Point2D.Double(bottomRight.getX(), yGlobal);
         	}
         }
-
+        
         printMap();
 	}
 
@@ -256,35 +196,37 @@ public class Map implements Runnable{
 	//prints the current map
 	public void printMap()
 	{
-<<<<<<< HEAD
+        System.out.print("+ ");
+        for (int i = (int) topLeft.getX(); i <= bottomRight.getX(); i++) {
+            System.out.print(Math.abs(i));
+        }
+        System.out.print(" +");
+        System.out.println("");
 		for(int y = (int)topLeft.getY(); y >= bottomRight.getY(); y--)
 		{
-=======
-		//print out x coordinate system
-		System.out.print(" ");
-		for(int x = (int)topLeft.getX(); x <= (int)bottomRight.getX(); x++){
-			System.out.print(Math.abs(x));
-		}
-			
-		System.out.println("");
+		    System.out.print(Math.abs(y) + " ");
 
-		for(int y = (int)topLeft.getY(); y >= bottomRight.getY(); y--)
-		{	
-			System.out.print(Math.abs(y));
->>>>>>> a62ce744716c74842913424d9a9dc17134eaf945
-			for(int x = (int)topLeft.getX(); x <= bottomRight.getX(); x++)
-			{
+		    for(int x = (int)topLeft.getX(); x <= bottomRight.getX(); x++)
+		    {
                 Point2D.Double currentPos = new Point2D.Double(x, y);
 				Character thing = map.get(currentPos);
-				if(thing == null)
-					System.out.print("?");
-				else 
-					System.out.print(thing);
-			}
-			System.out.println("");
-		}
-	}
+   				if(thing == null)
+   					System.out.print("?");
+   				else 
+   					System.out.print(thing);
+   			}
+		    System.out.print(" " + Math.abs(y));
+   			System.out.println("");
+   		}
+   	    
+        System.out.print("+ ");
+        for (int i = (int) topLeft.getX(); i <= bottomRight.getX(); i++) {
+            System.out.print(Math.abs(i));
+        }
+        System.out.print(" +");
+        System.out.println("");
 
+    }
 	// Determines if we can reach te gold.
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
@@ -372,7 +314,173 @@ public class Map implements Runnable{
 
     //Takes in a linked list of points to visit and current orientation and returns the moves to get there.
     private LinkedList<Move> changePathToMoves(LinkedList<Point2D.Double> path, int orientation){
-    	return null;
+    
+        // Keeps track of location
+        Point2D.Double curLoc = path.remove();
+        int curOrientation = orientation;
+
+        // Create the return value    
+        LinkedList<Move> retVal = new LinkedList<Move>();
+   
+        // While the queue is not empty
+        while (path.size() > 0) {
+
+            // Take off the first item off the queue
+            Point2D.Double next = path.remove();
+
+            // Determine which we way need to rotate (if at all) to get to it
+            LinkedList<Move> temp = determineRotation(curLoc, next, curOrientation);
+            while (temp.size() > 0) {
+                Move curMove = temp.remove();
+                switch (curMove.getMove()) {
+                    case 'r':
+                        curOrientation++;
+                        if (curOrientation > 4) curOrientation = 1;
+                        break;
+                    case 'l':
+                        curOrientation--;
+                        if (curOrientation < 1) curOrientation = 4;
+                        break;
+
+                }     
+                retVal.add(curMove);
+            }
+    
+            // Move Forward
+            Move forward = new Move('f');
+            retVal.add(forward);
+
+            // Repeat for next position
+            curLoc = next;
+        }
+        
+       return retVal; 
+    }
+
+    //Given two points and current orientation, returns the moves required to face "to"
+    private LinkedList<Move> determineRotation (Point2D.Double cur, Point2D.Double to, int orientation){
+       
+        // Stores whether to is north, east, south or west of current
+        int absoluteRelativePos = 0;
+        if (to.getY() == (cur.getY()+ 1)) {
+            absoluteRelativePos = NORTH;
+        } else if (to.getX() == (cur.getX() + 1)) {
+            absoluteRelativePos = EAST;
+        } else if (to.getY() == (cur.getY() - 1)) {
+            absoluteRelativePos = SOUTH;
+        } else if (to.getX() == (cur.getX() - 1)) {
+            absoluteRelativePos = WEST;
+        } else {
+            // Should not get to here
+            assert(false);
+        }
+
+        LinkedList<Move> retVal = new LinkedList<Move>();
+        Move temp = null;
+        switch (orientation) {
+        
+            // If we are facing north (absolutely)
+            case NORTH:
+                switch (absoluteRelativePos) {
+                    case NORTH:
+                        // Just move forward
+                        break;
+                    case EAST:
+                        // Rotate to the right
+                        temp = new Move('r');
+                        retVal.add(temp);
+                        break; 
+                    case SOUTH:
+                        // Rotate twice
+                        temp = new Move('r');
+                        retVal.add(temp);
+                        retVal.add(temp);
+                        break;            
+                    case WEST:
+                        // Rotate to the left
+                        temp = new Move('l');
+                        retVal.add(temp);
+                        break;
+                }
+                break;
+            
+            // If we are facing east (absolutely)
+            case EAST:
+                switch (absoluteRelativePos) {
+                    case NORTH:
+                        // Rotate to the left
+                        temp = new Move('l');
+                        retVal.add(temp);
+                        break;
+                    case EAST:
+                        // Just move forward
+                        break; 
+                    case SOUTH:
+                        // Rotate to the right
+                        temp = new Move('r');
+                        retVal.add(temp);
+                        break;            
+                    case WEST:
+                        // Rotate 180
+                        temp = new Move('l');
+                        retVal.add(temp);
+                        retVal.add(temp);
+                        break;
+                }
+                break;
+
+            // If we are facing south (absolutely)
+            case SOUTH:
+                switch (absoluteRelativePos) {
+                    case NORTH:
+                        // Rotate twice
+                        temp = new Move('r');
+                        retVal.add(temp);
+                        retVal.add(temp); 
+                        break;
+                    case EAST:
+                        // Rotate to the left
+                        temp = new Move('l');
+                        retVal.add(temp);
+                        break; 
+                    case SOUTH:
+                        // Just move forward 
+                        break;            
+                    case WEST:
+                        // Rotate to the right
+                        temp = new Move('r');
+                        retVal.add(temp);
+                        break;
+                }
+                break;
+            
+            // If we are facing west (absolutely)
+            case WEST:
+                switch (absoluteRelativePos) {
+                    case NORTH:
+                        // Rotate to the right
+                        temp = new Move('r');
+                        retVal.add(temp);
+                        break;
+                    case EAST:
+                        // Rotate 180
+                        temp = new Move('r');
+                        retVal.add(temp);
+                        retVal.add(temp);
+                        break; 
+                    case SOUTH:
+                        // Rotate Left
+                        temp = new Move('l');
+                        retVal.add(temp);
+                        break;            
+                    case WEST:
+                        // Go Forward
+                        break;
+                }
+                break;
+            
+        }
+        return retVal;
     }
 }
 
