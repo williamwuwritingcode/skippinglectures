@@ -75,22 +75,13 @@ public class Map implements Runnable{
 
         System.out.println("");
 
-
-
-	}
-
-
-	public Point2D.Double getGoldLocation()//possibly should be private
-	{
-		return goldLocation;
-	}
-
-	public Hashtable<Point2D.Double, Character> getCurMap()
-	{
-		return map;
-	}
+ 	}
     
-
+    // Clears the search hashtable to make sure that shit works.
+    public void clearSearch() {
+        search.clear();        
+    }
+    
     public boolean acquireDynamite(Point2D.Double check) {
         char temp;
         temp = map.get(check);
@@ -122,6 +113,14 @@ public class Map implements Runnable{
         	double yGlobal = 0;
              for(int y = 0; y < 5; y++)
         	{
+                if (x == 2 && y == 2) {
+                    xGlobal = currPos.getX();
+                    yGlobal = currPos.getY();
+                    Point2D.Double point = new Point2D.Double(xGlobal, yGlobal);
+                    map.put(point, ' ');
+                    continue;
+                }
+
                 // A switch statment that maps relative view index to global index
         		switch (dir){
 		        	case NORTH:
@@ -283,6 +282,21 @@ public class Map implements Runnable{
         return moves;
     } 
 
+    // Go Home
+    public LinkedList<Move> goHome(Point2D.Double curLoc, int direction) {
+        int[] items = new int[3];
+        items[AXE] = -1;
+        items[DYNAMITE] = -1;
+        items[BOAT] = 0;
+        LinkedList<Point2D.Double> roadHome = search.isPointReachable(new Point2D.Double(0,0), curLoc, direction, items);
+        return changePathToMoves(roadHome,direction); 
+    }
+
+    // Return Gold Location
+    public Point2D.Double getGoldLocation() {
+        return goldLocation;
+    }
+
     //Given the current location checks to see if the entirereachable area has been 
     //explored. The reachable area is defined as everywhere reachable from the current 
     // location without using any tools.
@@ -305,10 +319,8 @@ public class Map implements Runnable{
     public boolean isEmptySpace(Point2D.Double point, boolean axe) {
 		if (map.containsKey(point)) {
             
-            System.out.println("Contains " + point.getX() + " " + point.getY());
             char temp = map.get(point);
 		    if (temp == ' ' || temp  == 'e'|| temp == 'a' || temp == 'd') { 
-                System.out.println("Returning true " + temp + "yolo");
                 return true;
 		    } else if (map.get(point) == 'T' && axe) {
 		    	return true;

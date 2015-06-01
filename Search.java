@@ -76,8 +76,6 @@ public class Search{
 		topLeft = tl;
 		bottomRight = br;
 
-		System.out.println("UpdateMap: tl =" + tl + " br =" +br);
-
 		//should update map to hold values where question marks used to be, but 
 		//not override areas we have explored
 		for(double row = br.getY(); row <= tl.getY(); row++)
@@ -103,15 +101,11 @@ public class Search{
 				if(new_thing != null) {
 					//check if old thing is not 'e'
 					map.put(loc, new_thing);
-                } else {
-					System.out.println("Everything was null! (for " + loc + " )");
                 }
 			}
 		}
 
-		System.out.println("Updated Search Map");
 		printMap();
-        System.out.println("Returning from updateMap");
 	}
 
 	//Determines whether a point is reachable given a current location and an array of things it's 
@@ -121,7 +115,6 @@ public class Search{
 	public LinkedList<Point2D.Double> isPointReachable(Point2D.Double destination, Point2D.Double currLoc, int direction, int[] useableItems)
 	{	
 		//NB:can optimise this by checking if the area around the point is marked 'e'
-		System.out.println("Searching from:" + currLoc + " to " + destination);
 		
         // Queue of routes. A route is a search state.
         LinkedList<Route> nextRouteQueue = new LinkedList<Route>();
@@ -142,7 +135,6 @@ public class Search{
     		Route route = nextRouteQueue.remove();
     		Point2D.Double point = route.path.getLast();
 
-    		System.out.println("Searching point: " + point);
 
     		// Check if the adjacent points are moveable 
     		adjSearched = false;
@@ -163,16 +155,14 @@ public class Search{
             if (temp) break;
     	}	
     	
-    	//for testing
-    	if(pathToPoint == null){
-    		System.out.println("Point is not reachable!");
-    	}else{
-    		System.out.println("Point is reachable!");
-    	}
-
-    	return pathToPoint;
+        return pathToPoint;
 	}	
 
+    // Clears the Hashtable
+    public void clear() {
+        toBeSearched = new Hashtable<Point2D.Double, Character>();
+        toBeMoved = new Hashtable<Point2D.Double, Character>();
+    }
 
 	// Determines whether or not the current "space" is explored.
     // In the case of a maze like arena, this returns true if each branch is explored without having
@@ -203,8 +193,6 @@ public class Search{
     		LinkedList<Point2D.Double> path = nextPathQueue.remove();
     		Point2D.Double point = path.getLast();
 
-    		System.out.println("Exploring point: " + point);
-
     		//check if the adjacent points have been explored
             //Put a hashtable or something here that tracks whether or not that point is already on 
             //the queue.
@@ -216,15 +204,10 @@ public class Search{
 
 	    		//check areAdjecentExplored returned the expected
 	    		if(nextPoints.size() == 1){ 
-	    			path.add(nextPoints.getFirst());
+	    			//path.add(nextPoints.getFirst());
 	    			pathToUnexplored = path;
-	    			System.out.println("\tAdjacent unexplored was found at point: " + nextPoints.getFirst());
-	    		}else if (nextPoints.size() > 1){ 
-	    			System.out.println("areAdjacentExplored returned more than one value for adjecentExplored = false");
-	    		}else{
-	    			System.out.println("areAdjacentExplored did not return a point for adjacentExplored = false");
-	    		}
-
+                }
+                
                 //Break out of loop since an unexplored location has been found
 	    		break; 
 	    	
@@ -236,7 +219,6 @@ public class Search{
 	    			LinkedList<Point2D.Double> newPath = (LinkedList)(path.clone());
 	    			newPath.addLast(nextPoints.get(i));
 	    			nextPathQueue.add(newPath);
-	    			System.out.println("\tPoint added to next path: "+ nextPoints.get(i));
 	    		}
 	    	}
 
@@ -247,13 +229,7 @@ public class Search{
 
     	}	
     	
-    	if(pathToUnexplored!=null){
-    		System.out.println("The map is not explored!");
-    	}else{
-    		System.out.println("The map has been explored");
-    	}
-
-    	//return the linked list that this class passes back
+        //return the linked list that this class passes back
         return pathToUnexplored;
     }
 
@@ -280,7 +256,6 @@ public class Search{
     //NB: Currently prefers north, then east, south, west. 
     private LinkedList<Point2D.Double> areAdjacentExplored(Point2D.Double currLoc)
     {
-    	System.out.println("areAdjacentExplored");
     	
         // New Lists
         LinkedList<Point2D.Double> unexploredPoint = new LinkedList<Point2D.Double>();
@@ -309,7 +284,6 @@ public class Search{
                 // Mark that this point will be explored so unnecessary to search in another path
                 toBeSearched.put(p[i],'?');
 
-	    		System.out.println("\tUnexplored Point: " + p[i]);
 	    		
                 return unexploredPoint; 
 	    	
@@ -322,17 +296,13 @@ public class Search{
                 // Mark that this point will be explored
                 toBeSearched.put(p[i],map.get(p[i])); 
 
-                System.out.println("\tPoints to visit next: " + p[i]);
 	    	
             // If not any of the options above, we can't move into these spots. 
-            } else {
-	    		System.out.println("\tCan't move to point: " + p[i]);
-	    	}
-	    }
-
+	    
+            }
+        }
 	    //if program reaches here, all points must have been explored
 	   	adjExplored = true; 
-        System.out.println("\tadjcent explored");
 	   	return nextPointsToVisit;
     }
 
@@ -373,6 +343,7 @@ public class Search{
     	if(value == null)
     		return false;
 
+        Point2D.Double prev = route.path.getLast();
 
     	switch(value){
 	    	//can always move to these points
@@ -399,9 +370,9 @@ public class Search{
 			//can move here if allowed to use the boat and are standing on a boat or
 			// already on top of the water
 			case '~':
-				char curValue  = map.get(point);
+				char prevValue  = map.get(prev);
 				if((route.useableItems[BOAT] != NOT_ALLOWED) &&
-					((curValue == 'B') || (curValue == '~'))){
+					((prevValue == 'B') || (prevValue == '~'))){
 						canMoveTo = true;
 					}
 				break;

@@ -13,6 +13,7 @@ public class State {
     private Stack unexplored; // ?
     private Queue<Move> movesToDo; // Current queue of moves to be executed. This is automic.   
     private int direction; //(used as an enum: 1 = up, 2 = right, 3 = down, 4 = left (clockwise from up position));
+    private boolean gold;
 
     //tools
     public static final int AXE = 0;
@@ -24,6 +25,7 @@ public class State {
     public State(){
     	curMap = new Map();
         direction = 1;
+        gold = false;
         curLocation = new Point2D.Double(0,0);
         dynamite = 0;
         boat = 0;
@@ -125,20 +127,32 @@ public class State {
             System.out.println("Temp was not null");
             return temp;
         }
+        
+        if (gold) {
+            goHome();
+            temp = (Move) movesToDo.poll();
+            assert(temp != null);
+            return temp;
+        }
+
 
         if (isGoldReachable()) {
+             System.out.println("gold");
              temp = (Move) movesToDo.poll();
+             gold = true;
              assert(temp != null);
              return temp;
         }
 
         if (isAxeReachable()) {
+             System.out.println("AXE");
              temp = (Move)movesToDo.poll();
              assert(temp != null);
              return temp;
         }
 
         if (isDynamiteReachable()) {
+             System.out.println("Dynam");
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
@@ -149,20 +163,31 @@ public class State {
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
+        } else {
+            //Might have gotten stuck so clear search hastable and check again
+            curMap.clearSearch();
+            if (!isExplored()) {
+                System.out.println("Trying again");
+                temp = (Move) movesToDo.poll();
+                assert(temp != null);
+                return temp;
+            
+            //Else definitely explored now
+            } else {
+                if (isAxeReachableWithDynamite()) {
+                    System.out.println("Blowing shit up");
+                    temp = (Move) movesToDo.poll();
+                    assert(temp != null);
+                    return temp;
+                } else {
+                    System.out.println("fuck.");
+                    assert(false);
+                }
+            }
+    
         }
-
-        if (canMoveForward()) {
-             temp = (Move) movesToDo.poll();
-             assert(temp != null);
-             return temp;
-        }
-
-
-        rotateToAppropriateOrientation();
-        temp = (Move) movesToDo.poll();
-        assert(temp != null);
+        assert(false);
         return temp;
-
     }
 
 
@@ -191,6 +216,7 @@ public class State {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
             }
+
             return true;
         }
 
@@ -232,7 +258,7 @@ public class State {
         int[] items = new int[3];
         items[AXE] = 0;
         items[BOAT] = boat;
-        items[DYNAMITE] = dynamite;
+        items[DYNAMITE] = NOT_ALLOWED;
         LinkedList<Move> moves = curMap.isAxeReachable(curLocation, direction, items);         
 
         if (moves == null) {
@@ -246,6 +272,30 @@ public class State {
         }
 
     } 
+
+    // Use dynamite to check to see if we can get axe
+    private boolean isAxeReachableWithDynamite() {
+        if (axe){
+            return false;
+        }
+
+        int[] items = new int[3];
+        items[AXE] = 0;
+        items[BOAT] = boat;
+        items[DYNAMITE] = dynamite;
+        LinkedList<Move> moves = curMap.isAxeReachable(curLocation, direction, items);         
+
+        if (moves == null) {
+            return false;
+        }else{
+            while (moves.size() > 0 ) {
+                Move temp = moves.remove();
+                movesToDo.add(temp);
+            }
+            return true;
+        }        
+
+    }
 
     // Determines whether or not the current "space" is explored.
     // In the case of a maze like arena, this returns true if each branch is explored without having
@@ -264,10 +314,18 @@ public class State {
         return true;
     }
 
+    // We found the gold, let's finish this
+    private void goHome() {
+        LinkedList<Move> moves = curMap.goHome(curLocation, direction);
 
-    // Gets the current direction
-    public int getDirection() {
-        return direction;
+        if(moves != null){
+            while (moves.size() > 0 ) {
+                Move temp = moves.remove();
+                movesToDo.add(temp);
+            }   
+        } else {
+            assert(false);
+        } 
     }
 
     // Returns a poin2d representing the square directly in front
