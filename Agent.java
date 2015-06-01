@@ -18,8 +18,9 @@ public class Agent {
     }
 
     public char get_action( char view[][] ) {
-        
+      
       Move temp = curState.makeMove();
+      curState.adjustState(temp);
       return temp.getMove();
 /*
       // REPLACE THIS CODE WITH AI TO CHOOSE ACTION

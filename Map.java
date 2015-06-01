@@ -231,31 +231,57 @@ public class Map implements Runnable{
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
     // Updates the moves queue.
-    public LinkedList<Character> isGoldReachable(Point2D.Double currLoc) {
-    	// A* search through known parts of the map 
+    public LinkedList<Move> isGoldReachable(int orientation, Point2D.Double currLoc, int[] items) {
+    	
+        LinkedList<Move> moves = null;
 
-        return null;
+        // check if we know where to gold is
+        if(goldLocation != null){
+            LinkedList<Point2D.Double> path = search.isPointReachable(goldLocation, currLoc, orientation, items);
+            if(path != null){
+                moves = changePathToMoves(path, orientation);
+            } 
+        }
+        return moves;
     }
     
     // Determines whether or not we can get to some dynamite.
     // We place restrictions on using dynamite to get to it for now. This might be a mistake TODO
     // Updates the moves queue.
-    public boolean isDynamiteReachable() { 
-        return false;
+    public LinkedList<Move> isDynamiteReachable(int orientation, Point2D.Double currLoc, int[] items) { 
+        LinkedList<Move> moves = null;
+        LinkedList<Point2D.Double> path = null;
+
+        for(int i = 0; i < dynamiteLocations.size(); i++){
+            path = search.isPointReachable(dynamiteLocations.get(i), currLoc, orientation, items);
+            if(path != null) break;
+        }
+
+        if(path != null){
+            moves = changePathToMoves(path, orientation);
+        }
+
+        return moves;
     }
 
     // Determines whether or not the axe is reachable. 
     // We place on restrictions on using dynamite to get to it. This might be a mistake TODO
     // Updates the moves queue.
     public LinkedList<Move> isAxeReachable(Point2D.Double currLoc, int direction, int[] useableItems){
+        LinkedList<Move> moves = null;
+        LinkedList<Point2D.Double> path = null;
 
-        return null;
+        for(int i = 0; i < axeLocations.size(); i++){
+            path = search.isPointReachable(axeLocations.get(i), currLoc, direction, useableItems);
+            if(path != null) break;
+        }
+
+        if(path != null){
+            moves = changePathToMoves(path, direction);
+        }
+
+        return moves;
     } 
-
-    public boolean isAxeReachable()
-    {
-    	return false;
-    }
 
     //Given the current location checks to see if the entirereachable area has been 
     //explored. The reachable area is defined as everywhere reachable from the current 

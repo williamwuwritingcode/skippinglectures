@@ -8,16 +8,25 @@ public class State {
     private ArrayList<Move> movesTaken; // Need this to get back to the start
     private Boolean axe; // Determines whether we have an axe or not
     private int dynamite; // Determines how many dynamites we have
+    private int boat;
     private Point2D.Double curLocation; // Current Location
     private Stack unexplored; // ?
     private Queue<Move> movesToDo; // Current queue of moves to be executed. This is automic.   
     private int direction; //(used as an enum: 1 = up, 2 = right, 3 = down, 4 = left (clockwise from up position));
+
+    //tools
+    public static final int AXE = 0;
+    public static final int DYNAMITE = 1;
+    public static final int BOAT = 2;
+
+    public static final int NOT_ALLOWED = -1;
     
     public State(){
     	curMap = new Map();
         direction = 1;
         curLocation = new Point2D.Double(0,0);
         dynamite = 0;
+        boat = 0;
         axe = false;
         movesTaken = new ArrayList<Move>();
         unexplored = new Stack();
@@ -110,30 +119,33 @@ public class State {
     public Move makeMove() {
         
         // Are there any other moves?
-        Move temp = (Move)movesToDo.poll();
+        Move temp = movesToDo.poll();
+        
         if (temp != null) {
+            System.out.println("Temp was not null");
             return temp;
         }
 
-        if (curMap.isGoldReachable(curLocation) != null) {
+        if (isGoldReachable()) {
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
         }
 
-        if (curMap.isAxeReachable()) {
+        if (isAxeReachable()) {
              temp = (Move)movesToDo.poll();
              assert(temp != null);
              return temp;
         }
 
-        if (curMap.isDynamiteReachable()) {
+        if (isDynamiteReachable()) {
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
         }
 
-        if (curMap.isExplored()) {
+        if (!isExplored()) {
+            System.out.println("Is not explored");
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
@@ -164,7 +176,14 @@ public class State {
         Point2D.Double gold = curMap.getGoldLocation();
         if (gold == null) return false;
 
-        LinkedList<Move> moves = curMap.isGoldReachable(orientation, curLocation);
+        int[] items = new int[3];
+
+        if(axe) items[AXE] = 1;
+        else items[AXE] = 0;
+
+        items[DYNAMITE] = dynamite;
+        items[BOAT] = boat;
+        LinkedList<Move> moves = curMap.isGoldReachable(direction, curLocation, items);
         if (moves == null) {
             return false;
         } else {
@@ -172,6 +191,7 @@ public class State {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
             }
+            return true;
         }
 
     }
@@ -179,10 +199,26 @@ public class State {
     // Determines whether or not we can get to some dynamite.
     // We place restrictions on using dynamite to get to it for now. This might be a mistake TODO
     // Updates the moves queue.
-    private boolean isDynamiteReachable() 
-        
+    private boolean isDynamiteReachable() {
+        int[] items = new int[3];
 
+        if(axe) items[AXE] = 1;
+        else items[AXE] = 0;
 
+        items[DYNAMITE] = NOT_ALLOWED;
+        items[BOAT] = boat;
+        //ask the map if dynamite is reachable
+        LinkedList<Move> moves = curMap.isDynamiteReachable(direction, curLocation, items);         
+
+        if (moves == null) {
+            return false;
+        }else{
+            while (moves.size() > 0 ) {
+                Move temp = moves.remove();
+                movesToDo.add(temp);
+            }
+            return true;
+        }
     }
 
     // Determines whether or not the axe is reachable. 
@@ -192,6 +228,23 @@ public class State {
         if (axe){
             return false;
         }
+
+        int[] items = new int[3];
+        items[AXE] = 0;
+        items[BOAT] = boat;
+        items[DYNAMITE] = dynamite;
+        LinkedList<Move> moves = curMap.isAxeReachable(curLocation, direction, items);         
+
+        if (moves == null) {
+            return false;
+        }else{
+            while (moves.size() > 0 ) {
+                Move temp = moves.remove();
+                movesToDo.add(temp);
+            }
+            return true;
+        }
+
     } 
 
     // Determines whether or not the current "space" is explored.
@@ -199,8 +252,16 @@ public class State {
      // to cut anything down or blow anything up.
     // Updates the moves queue.
     private boolean isExplored() {
+        LinkedList<Move> moves = curMap.isExplored(curLocation, direction);
 
-
+        if(moves != null){
+            while (moves.size() > 0 ) {
+                Move temp = moves.remove();
+                movesToDo.add(temp);
+            }
+            return false;
+        }
+        return true;
     }
 
 
@@ -290,6 +351,7 @@ public class State {
 
         // Send in empty because we don't want to consider using an axe in this case
         if (curMap.isEmptySpace(forwardPoint, false)) { 
+            movesToDo.add(new Move('f'));
             return true;     
         }
         

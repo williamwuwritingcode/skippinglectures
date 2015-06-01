@@ -314,7 +314,7 @@ public class Search{
                 return unexploredPoint; 
 	    	
             // We know what's in these coordinates, but not necessarily whats on the other side.
-            } else if ((value == ' ') || (value == 'a') || (value == 'd')){
+            } else if ((value == ' ') || (value == 'a') || (value == 'd') || (value == 'e')){
 	    		
                 // Mark the point as something we need to explore
                 nextPointsToVisit.add(p[i]);
@@ -391,6 +391,7 @@ public class Search{
 			case '*':
 				if(route.useableItems[DYNAMITE] >= USEABLE){
 					route.useableItems[DYNAMITE] -= 1;
+                    toBeSearched = new Hashtable<Point2D.Double, Character>();
 					canMoveTo = true;
 				}
 				break;
@@ -409,6 +410,7 @@ public class Search{
 			case 'a':
 				if(route.useableItems[AXE] != NOT_ALLOWED){
 					route.useableItems[AXE] = USEABLE;
+                    toBeSearched = new Hashtable<Point2D.Double, Character>();
 				}
 				canMoveTo = true;
 				break;
@@ -417,6 +419,7 @@ public class Search{
 			case 'd':
 				if(route.useableItems[DYNAMITE] != NOT_ALLOWED){
 					route.useableItems[DYNAMITE] += 1;
+                    toBeSearched = new Hashtable<Point2D.Double, Character>();
 				}
 				canMoveTo = true;
 				break;
