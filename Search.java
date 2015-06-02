@@ -147,7 +147,6 @@ public class Search{
     		if(nextRoutes != null){
     			for(int i = 0; i < nextRoutes.size(); i++){
       				Route curRoute = nextRoutes.get(i);
-      			    System.out.println("Last point added: "+ curRoute.path.getLast() + "destination: " + destination);	
                     //check if any of the routes we're adding go to the destination
     				if(curRoute.path.getLast().equals(destination)){
     					pathToPoint = curRoute.path;

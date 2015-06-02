@@ -393,13 +393,15 @@ public class Map {
 
             // Take off the first item off the queue
             Point2D.Double next = path.remove();
-             
-            if (map.get(next) == 'T') {
+
+            if (map.get(next) == null){
+                System.out.println("Map null at " + next);
+                break;
+            }else if (map.get(next) == 'T') {
                 retVal.add(new Move('c')); 
             } else if (map.get(next) == '*') { 
                 retVal.add(new Move('b'));
-            } else {
-
+            }else{
                 // Determine which we way need to rotate (if at all) to get to it 
                 LinkedList<Move> temp = determineRotation(curLoc, next, curOrientation);
                 while (temp.size() > 0) {
