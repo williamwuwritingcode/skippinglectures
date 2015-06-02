@@ -115,12 +115,18 @@ public class Search{
 	public LinkedList<Point2D.Double> isPointReachable(Point2D.Double destination, Point2D.Double currLoc, int direction, int[] useableItems)
 	{	
 		//NB:can optimise this by checking if the area around the point is marked 'e'
-		
+		System.out.println("Searching from "+ currLoc + " to "+destination);
         // Queue of routes. A route is a search state.
         LinkedList<Route> nextRouteQueue = new LinkedList<Route>();
 
+        //if value is not a valid point, don't add it 
+        toBeMoved = new Hashtable<Point2D.Double, Character>();
+
         // A path to the required point. Doesn't get updated if not reachable.
 		LinkedList<Point2D.Double> pathToPoint = null;
+
+        
+        toBeMoved = new Hashtable<Point2D.Double, Character>();
 
     	//start the first path in the queue with just currLoc
     	Route initRoute = new Route(currLoc, useableItems.clone()); 
@@ -133,8 +139,6 @@ public class Search{
 
     		//get the next path in the queue and location of the last point in the list
     		Route route = nextRouteQueue.remove();
-    		Point2D.Double point = route.path.getLast();
-
 
     		// Check if the adjacent points are moveable 
     		adjSearched = false;
@@ -143,7 +147,8 @@ public class Search{
     		if(nextRoutes != null){
     			for(int i = 0; i < nextRoutes.size(); i++){
       				Route curRoute = nextRoutes.get(i);
-      				//check if any of the routes we're adding go to the destination
+      			    System.out.println("Last point added: "+ curRoute.path.getLast() + "destination: " + destination);	
+                    //check if any of the routes we're adding go to the destination
     				if(curRoute.path.getLast().equals(destination)){
     					pathToPoint = curRoute.path;
     					temp = true;
@@ -154,7 +159,7 @@ public class Search{
     		}
             if (temp) break;
     	}	
-    	
+         	
         return pathToPoint;
 	}	
 
@@ -173,6 +178,7 @@ public class Search{
     	// Check if the internal explored value is true, if so no need to search.
     	if (explored)
     		return null;
+        
     	
     	//A queue that stores the paths to be searched
         // A path is defined as a list of points
@@ -204,7 +210,7 @@ public class Search{
 
 	    		//check areAdjecentExplored returned the expected
 	    		if(nextPoints.size() == 1){ 
-	    			//path.add(nextPoints.getFirst());
+	    			path.add(nextPoints.getFirst());
 	    			pathToUnexplored = path;
                 }
                 
@@ -288,7 +294,7 @@ public class Search{
                 return unexploredPoint; 
 	    	
             // We know what's in these coordinates, but not necessarily whats on the other side.
-            } else if ((value == ' ') || (value == 'a') || (value == 'd') || (value == 'e')){
+            } else if ((value == ' ') || (value == 'g') || (value == 'a') || (value == 'd') || (value == 'e')){
 	    		
                 // Mark the point as something we need to explore
                 nextPointsToVisit.add(p[i]);
@@ -309,21 +315,33 @@ public class Search{
     LinkedList<Route> areAdjacentMoveable(Route route){
     	Point2D.Double point = route.path.getLast();
     	LinkedList<Route> newRoutes = null;
-        
-        toBeMoved = new Hashtable<Point2D.Double, Character>();
+       
+        //Pretty sure the line below is a mistake
+        //toBeMoved = new Hashtable<Point2D.Double, Character>();
 
     	Point2D.Double p[] = getAdjacentPoints(point);
-    	for(int i = 0; i < WEST; i++)
+    	//System.out.println("Checking points adjacent to: "+ point);
+        
+        // Put our current point on the list of checked 
+        toBeMoved.put(point, 'x');
+         
+        for(int i = 0; i < WEST; i++)
     	{
-            if (toBeMoved.containsKey(p[i])) {
+            //System.out.println("before check toBeMoved");
+            if (toBeMoved.containsKey(p[i])) { 
+//              System.out.println("contains key");
                 continue;
             } else {
                 toBeMoved.put(p[i], '?');
             }
+            
+            //Might need to implement our own cloneable....TODO
             Route newRoute = route.clone();
     		boolean moveSuccess = addPointToRoute(newRoute, p[i]);
     		
     		if(moveSuccess){
+                //System.out.println("\t point " + p[i] +  "added to route");
+                
     			//if the new routes list hasn't been initialised, initialise it
     			if(newRoutes == null)
     				newRoutes = new LinkedList<Route>();
@@ -340,9 +358,12 @@ public class Search{
     {
     	boolean canMoveTo = false;
     	Character value = map.get(point);
-    	if(value == null)
-    		return false;
-
+    	if(value == null) {
+//    	    System.out.println("Shit");
+            return false;
+        }
+        
+//        System.out.println("Attempt adding: " + point +  "With value" + value  + "to route");
         Point2D.Double prev = route.path.getLast();
 
     	switch(value){
@@ -396,8 +417,10 @@ public class Search{
 				break;
 		}
 
-		if(canMoveTo)
+		if(canMoveTo){
+//            System.out.println("Added!");
 			route.path.addLast(point);
+        }
 
 		return canMoveTo;
     }

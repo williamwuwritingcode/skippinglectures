@@ -5,7 +5,7 @@ import java.io.*;
 public class State {
     
     private Map curMap; // The original map
-    private ArrayList<Move> movesTaken; // Need this to get back to the start
+    private Stack<Move> movesTaken; // Need this to get back to the start
     private Boolean axe; // Determines whether we have an axe or not
     private int dynamite; // Determines how many dynamites we have
     private int boat;
@@ -30,7 +30,7 @@ public class State {
         dynamite = 0;
         boat = 0;
         axe = false;
-        movesTaken = new ArrayList<Move>();
+        movesTaken = new Stack<Move>();
         unexplored = new Stack();
         movesToDo = new LinkedList<Move>();
     }
@@ -96,7 +96,7 @@ public class State {
         assert(direction > 0 && direction < 5); //Sanity Check
         
         //Update movesTaken
-        movesTaken.add(thing);
+        movesTaken.push(thing);
         
         //Print the map
         curMap.printMap();
@@ -124,8 +124,17 @@ public class State {
         Move temp = movesToDo.poll();
         
         if (temp != null) {
-            System.out.println("Temp was not null");
-            return temp;
+            
+            // If the move is to go forward and forward means going into water w/o boat,
+            // cancel the move.
+            if (!(!curMap.isEmptySpace(getPointInFront(), false) && temp.getMove() =='f')) {
+                return temp;
+                
+            } else {
+                System.out.println("cancelled the move @ " + curLocation + " " + temp.getMove() + " " + direction);
+                System.out.println("PIF " + getPointInFront() );
+            }
+            
         }
         
         if (gold) {
@@ -191,20 +200,26 @@ public class State {
     }
 
 
-    // Determines if we can reach te gold.
+    // Determine if we can reach te gold.
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
     // Updates the moves queue.
     private boolean isGoldReachable() {
-        
+        System.out.println("inGold"); 
         // If we haven't found gold yet, no point searching for it.
-        Point2D.Double gold = curMap.getGoldLocation();
-        if (gold == null) return false;
+        Point2D.Double goldLoc = curMap.getGoldLocation();
+        if (goldLoc == null) {
+            return false;
+        }
 
+        System.out.println("not Null");
         int[] items = new int[3];
 
-        if(axe) items[AXE] = 1;
-        else items[AXE] = 0;
+        if(axe) {
+            items[AXE] = 1;
+        } else {
+            items[AXE] = 0;
+        }
 
         items[DYNAMITE] = dynamite;
         items[BOAT] = boat;
@@ -259,7 +274,7 @@ public class State {
         items[AXE] = 0;
         items[BOAT] = boat;
         items[DYNAMITE] = NOT_ALLOWED;
-        LinkedList<Move> moves = curMap.isAxeReachable(curLocation, direction, items);         
+        LinkedList<Move> moves = curMap.isAxeReachable(curLocation, direction, items );         
 
         if (moves == null) {
             return false;
@@ -316,7 +331,8 @@ public class State {
 
     // We found the gold, let's finish this
     private void goHome() {
-        LinkedList<Move> moves = curMap.goHome(curLocation, direction);
+        //Go Back in reverse order
+        LinkedList<Move> moves = curMap.goHome(movesTaken);
 
         if(moves != null){
             while (moves.size() > 0 ) {

@@ -96,7 +96,7 @@ public class Map implements Runnable{
         temp = map.get(check);
         if (temp == 'a') {         
             return true;
-        }
+       }
         return false;
     }
 
@@ -147,7 +147,7 @@ public class Map implements Runnable{
                 // Add the element in at the right coordinate
 	        	char thing = view[y][x];
 	        	Point2D.Double point = new Point2D.Double(xGlobal, yGlobal);
-	        	map.put(point ,thing);         
+	        	updateMapPoint(point,thing);         
 
                 // Update the top left and bottom right hand corners
 	        	if(xGlobal < topLeft.getX())
@@ -171,14 +171,17 @@ public class Map implements Runnable{
 		map.put(point, thing);
 
 		//update gold location
-		if(thing.equals("g"))
+		if(thing.equals('g')) {
+            System.out.println("updating gold");
 			this.goldLocation = point;
-		else if (thing.equals("d"))
+        } else if (thing.equals('d')) {
 			this.dynamiteLocations.add(point);
-		else if (thing.equals("B"))
+        } else if (thing.equals('B')) {
 			this.boatLocations.add(point);
-		else if (thing.equals("a"))
+        } else if (thing.equals('a')) {
 			this.axeLocations.add(point);
+        }
+
 
 		//update bottom right and top left if needed
 		if (point.getX() > bottomRight.getX())
@@ -231,14 +234,22 @@ public class Map implements Runnable{
     // to the gold it's game over. 
     // Updates the moves queue.
     public LinkedList<Move> isGoldReachable(int orientation, Point2D.Double currLoc, int[] items) {
-    	
+        System.out.println("in isgoldReachable");    	
         LinkedList<Move> moves = null;
-
+        
+		search.updateMap(map, topLeft, bottomRight);
+        
         // check if we know where to gold is
         if(goldLocation != null){
             LinkedList<Point2D.Double> path = search.isPointReachable(goldLocation, currLoc, orientation, items);
             if(path != null){
+                System.out.println("Found a path to gold!");
                 moves = changePathToMoves(path, orientation);
+                for (Move temp: moves){
+                    System.out.print(temp.getMove());
+                }
+                System.out.println("");
+
             } 
         }
         return moves;
@@ -251,6 +262,8 @@ public class Map implements Runnable{
         LinkedList<Move> moves = null;
         LinkedList<Point2D.Double> path = null;
 
+		search.updateMap(map, topLeft, bottomRight);
+        
         for(int i = 0; i < dynamiteLocations.size(); i++){
             path = search.isPointReachable(dynamiteLocations.get(i), currLoc, orientation, items);
             if(path != null) break;
@@ -270,6 +283,8 @@ public class Map implements Runnable{
         LinkedList<Move> moves = null;
         LinkedList<Point2D.Double> path = null;
 
+		search.updateMap(map, topLeft, bottomRight);
+        
         for(int i = 0; i < axeLocations.size(); i++){
             path = search.isPointReachable(axeLocations.get(i), currLoc, direction, useableItems);
             if(path != null) break;
@@ -283,13 +298,31 @@ public class Map implements Runnable{
     } 
 
     // Go Home
-    public LinkedList<Move> goHome(Point2D.Double curLoc, int direction) {
-        int[] items = new int[3];
-        items[AXE] = -1;
-        items[DYNAMITE] = -1;
-        items[BOAT] = 0;
-        LinkedList<Point2D.Double> roadHome = search.isPointReachable(new Point2D.Double(0,0), curLoc, direction, items);
-        return changePathToMoves(roadHome,direction); 
+    public LinkedList<Move> goHome(Stack<Move> movesTaken) {
+        Move temp = null;
+        Move newMove = null;
+        LinkedList<Move> retVal = new LinkedList<Move>();
+        temp = new Move('l');
+        retVal.add(temp);
+        retVal.add(temp);
+        while (!movesTaken.empty()){
+            temp = movesTaken.pop(); 
+            switch (temp.getMove()) {
+                case 'l':
+                    newMove = new Move('r');
+                    retVal.add(newMove);
+                    break;
+                case 'r':
+                    newMove = new Move('l');
+                    retVal.add(newMove);
+                    break;
+                case 'f':
+                    newMove = new Move('f');
+                    retVal.add(newMove);
+                    break;
+            }
+        }
+        return retVal;
     }
 
     // Return Gold Location
@@ -313,14 +346,14 @@ public class Map implements Runnable{
     	return movesToUnexplored;
     }
 
-    public boolean isExplored(){return false;};
+    //public boolean isExplored(){return false;};
 
     // Determines whether a space is empty
     public boolean isEmptySpace(Point2D.Double point, boolean axe) {
 		if (map.containsKey(point)) {
             
             char temp = map.get(point);
-		    if (temp == ' ' || temp  == 'e'|| temp == 'a' || temp == 'd') { 
+		    if (temp == 'g' || temp == ' ' || temp  == 'e'|| temp == 'a' || temp == 'd') { 
                 return true;
 		    } else if (map.get(point) == 'T' && axe) {
 		    	return true;
