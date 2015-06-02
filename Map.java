@@ -2,7 +2,7 @@ import java.awt.geom.Point2D;
 import java.io.*;
 import java.util.*;
 import java.lang.Math;
-public class Map implements Runnable{
+public class Map {
 
 	private Hashtable<Point2D.Double, Character> map;
 	private Search search;
@@ -12,6 +12,8 @@ public class Map implements Runnable{
 	private LinkedList<Point2D.Double> dynamiteLocations;
 	private LinkedList<Point2D.Double> axeLocations;
 	private LinkedList<Point2D.Double> boatLocations; 
+    private LinkedList<Point2D.Double> treeLocations;
+    
 
 	//these save bounds of the map
 	private Point2D.Double topLeft;
@@ -44,38 +46,9 @@ public class Map implements Runnable{
 		this.dynamiteLocations = new LinkedList<Point2D.Double>();
 		this.axeLocations = new LinkedList<Point2D.Double>();
 		this.boatLocations = new LinkedList<Point2D.Double>();
-	}
+        this.treeLocations = new LinkedList<Point2D.Double>();
+    }
 
-	//get rid of run and main when we implement it
-	public void run()
-	{
-		char[][] view = {
-			{'*', ' ', ' ', '~', '~'},
-			{'~', '*', ' ', '*', '~'},
-			{'B', '*', ' ', ' ', ' '},
-			{'~', ' ', '*', ' ', '~'},
-			{'~', '~', '~', ' ', '~'}	 
-		};
-
-		System.out.println("MAP");
-		updateMap( view, 0, 0, NORTH);
-//		printMap();
-
-		isExplored(new Point2D.Double(0, 0), NORTH);
-
-		int items[] = {0, 0, 0, 0};
-		LinkedList<Point2D.Double> temp = search.isPointReachable(new Point2D.Double(2, 0), new Point2D.Double(0, 0), NORTH, items);
-        LinkedList<Move> temp2 = changePathToMoves(temp, NORTH);
-
-        while (temp2.size() > 0) {
-            Move temp3 = temp2.remove();
-            System.out.print(temp3.getMove() + " ");
-        
-        }
-
-        System.out.println("");
-
- 	}
     
     // Clears the search hashtable to make sure that shit works.
     public void clearSearch() {
@@ -180,6 +153,8 @@ public class Map implements Runnable{
 			this.boatLocations.add(point);
         } else if (thing.equals('a')) {
 			this.axeLocations.add(point);
+        } else if (thing.equals('T')) {
+            this.treeLocations.add(point);
         }
 
 
@@ -195,7 +170,33 @@ public class Map implements Runnable{
 			bottomRight.setLocation(bottomRight.getX(), point.getY());
 	}
 
-	//prints the current map
+	// Finds a tree and cuts it down 
+    public LinkedList<Move> cutDownTree(Point2D.Double currLoc, int direction){
+        System.out.println("in cutDownTree");    	
+        LinkedList<Move> moves = null;
+        
+		search.updateMap(map, topLeft, bottomRight);
+        int[] items = new int[3];
+        items[AXE] = 1;
+        items[DYNAMITE] = -1;
+        items[BOAT] = 0; 
+            
+        // Make sure there are trees
+        if (treeLocations.size() > 0) {
+
+            for (int i = 0; i < treeLocations.size(); i++) {
+                Point2D.Double tree = treeLocations.get(i);
+                LinkedList<Point2D.Double> path = search.isPointReachable(tree, currLoc, direction, items);
+                if (!(path == null)) {
+                    treeLocations.remove(i);
+                    return changePathToMoves(path, direction);
+                } 
+            } 
+        }
+        return null;
+    }
+    
+    //prints the current map
 	public void printMap()
 	{
         System.out.print("+ ");
@@ -335,7 +336,7 @@ public class Map implements Runnable{
     // location without using any tools.
     //returns:  - null if the area has been explored
     //			- a linked list of moves to get to the closest unexplored area.
-    public LinkedList<Move> isExplored(Point2D.Double currLoc, int orientation){
+    public LinkedList<Move> isExplored(Point2D.Double currLoc, int orientation) {
 		search.updateMap(map, topLeft, bottomRight);
 		LinkedList<Point2D.Double> pathToUnexplored = search.isExplored(currLoc);
 
@@ -346,7 +347,6 @@ public class Map implements Runnable{
     	return movesToUnexplored;
     }
 
-    //public boolean isExplored(){return false;};
 
     // Determines whether a space is empty
     public boolean isEmptySpace(Point2D.Double point, boolean axe) {
@@ -362,13 +362,7 @@ public class Map implements Runnable{
     	}
     	return false;
     }
-
-	public static void main(String[] args)
-	{
-		Map map = new Map();
-		map.run();
-	}
-   
+    
     //Removes a wall/tree using dynamite
     public void blow(Point2D.Double point) {
         if (map.get(point) == 'T' || map.get(point) == '*') {
@@ -384,6 +378,7 @@ public class Map implements Runnable{
     }
 
     //Takes in a linked list of points to visit and current orientation and returns the moves to get there.
+    //This needs to be modified to add cuts and blow ups in the change over process
     private LinkedList<Move> changePathToMoves(LinkedList<Point2D.Double> path, int orientation){
     
         // Keeps track of location
@@ -398,25 +393,31 @@ public class Map implements Runnable{
 
             // Take off the first item off the queue
             Point2D.Double next = path.remove();
+             
+            if (map.get(next) == 'T') {
+                retVal.add(new Move('c')); 
+            } else if (map.get(next) == '*') { 
+                retVal.add(new Move('b'));
+            } else {
 
-            // Determine which we way need to rotate (if at all) to get to it
-            LinkedList<Move> temp = determineRotation(curLoc, next, curOrientation);
-            while (temp.size() > 0) {
-                Move curMove = temp.remove();
-                switch (curMove.getMove()) {
-                    case 'r':
-                        curOrientation++;
-                        if (curOrientation > 4) curOrientation = 1;
-                        break;
-                    case 'l':
-                        curOrientation--;
-                        if (curOrientation < 1) curOrientation = 4;
-                        break;
-
-                }     
+                // Determine which we way need to rotate (if at all) to get to it 
+                LinkedList<Move> temp = determineRotation(curLoc, next, curOrientation);
+                while (temp.size() > 0) {
+                    Move curMove = temp.remove();
+                    switch (curMove.getMove()) {
+                        case 'r':
+                            curOrientation++;
+                            if (curOrientation > 4) curOrientation = 1;
+                            break;
+                        case 'l':
+                            curOrientation--;
+                            if (curOrientation < 1) curOrientation = 4;
+                            break;
+                    }     
                 retVal.add(curMove);
+                }   
             }
-    
+
             // Move Forward
             Move forward = new Move('f');
             retVal.add(forward);

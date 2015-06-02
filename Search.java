@@ -163,7 +163,7 @@ public class Search{
         return pathToPoint;
 	}	
 
-    // Clears the Hashtable
+    // Clears the Hashtable I don't think we need this TODO
     public void clear() {
         toBeSearched = new Hashtable<Point2D.Double, Character>();
         toBeMoved = new Hashtable<Point2D.Double, Character>();
@@ -179,7 +179,9 @@ public class Search{
     	if (explored)
     		return null;
         
-    	
+        // Clear the queue
+        toBeSearched = new Hashtable<Point2D.Double, Character>();
+
     	//A queue that stores the paths to be searched
         // A path is defined as a list of points
     	LinkedList<LinkedList<Point2D.Double>> nextPathQueue = new LinkedList<LinkedList<Point2D.Double>>();
@@ -316,33 +318,24 @@ public class Search{
     	Point2D.Double point = route.path.getLast();
     	LinkedList<Route> newRoutes = null;
        
-        //Pretty sure the line below is a mistake
-        //toBeMoved = new Hashtable<Point2D.Double, Character>();
-
     	Point2D.Double p[] = getAdjacentPoints(point);
-    	//System.out.println("Checking points adjacent to: "+ point);
         
         // Put our current point on the list of checked 
         toBeMoved.put(point, 'x');
          
         for(int i = 0; i < WEST; i++)
     	{
-            //System.out.println("before check toBeMoved");
             if (toBeMoved.containsKey(p[i])) { 
-//              System.out.println("contains key");
                 continue;
             } else {
                 toBeMoved.put(p[i], '?');
             }
             
-            //Might need to implement our own cloneable....TODO
             Route newRoute = route.clone();
     		boolean moveSuccess = addPointToRoute(newRoute, p[i]);
     		
     		if(moveSuccess){
-                //System.out.println("\t point " + p[i] +  "added to route");
                 
-    			//if the new routes list hasn't been initialised, initialise it
     			if(newRoutes == null)
     				newRoutes = new LinkedList<Route>();
 
@@ -359,11 +352,9 @@ public class Search{
     	boolean canMoveTo = false;
     	Character value = map.get(point);
     	if(value == null) {
-//    	    System.out.println("Shit");
             return false;
         }
         
-//        System.out.println("Attempt adding: " + point +  "With value" + value  + "to route");
         Point2D.Double prev = route.path.getLast();
 
     	switch(value){
@@ -418,7 +409,6 @@ public class Search{
 		}
 
 		if(canMoveTo){
-//            System.out.println("Added!");
 			route.path.addLast(point);
         }
 

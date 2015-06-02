@@ -129,10 +129,6 @@ public class State {
             // cancel the move.
             if (!(!curMap.isEmptySpace(getPointInFront(), false) && temp.getMove() =='f')) {
                 return temp;
-                
-            } else {
-                System.out.println("cancelled the move @ " + curLocation + " " + temp.getMove() + " " + direction);
-                System.out.println("PIF " + getPointInFront() );
             }
             
         }
@@ -152,12 +148,14 @@ public class State {
              assert(temp != null);
              return temp;
         }
-
-        if (isAxeReachable()) {
-             System.out.println("AXE");
-             temp = (Move)movesToDo.poll();
-             assert(temp != null);
-             return temp;
+        
+        if (!axe) {
+            if (isAxeReachable()) {
+                System.out.println("AXE");
+                temp = (Move)movesToDo.poll();
+                assert(temp != null);
+                return temp;
+            }
         }
 
         if (isDynamiteReachable()) {
@@ -172,28 +170,24 @@ public class State {
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
+        
         } else {
-            //Might have gotten stuck so clear search hastable and check again
-            curMap.clearSearch();
-            if (!isExplored()) {
-                System.out.println("Trying again");
-                temp = (Move) movesToDo.poll();
-                assert(temp != null);
-                return temp;
-            
-            //Else definitely explored now
-            } else {
+            if (!axe) {
                 if (isAxeReachableWithDynamite()) {
                     System.out.println("Blowing shit up");
                     temp = (Move) movesToDo.poll();
                     assert(temp != null);
                     return temp;
-                } else {
-                    System.out.println("fuck.");
-                    assert(false);
                 }
+
+            // Find a tree and cut it down 
+            } else {
+                cutDownTree();
+                System.out.println("looking for a tree to be cut down");
+                temp = (Move) movesToDo.poll();
+                assert(temp != null);
+                return temp;
             }
-    
         }
         assert(false);
         return temp;
@@ -266,9 +260,6 @@ public class State {
     // We place on restrictions on using dynamite to get to it. This might be a mistake TODO
     // Updates the moves queue.
     private boolean isAxeReachable(){
-        if (axe){
-            return false;
-        }
 
         int[] items = new int[3];
         items[AXE] = 0;
@@ -290,9 +281,6 @@ public class State {
 
     // Use dynamite to check to see if we can get axe
     private boolean isAxeReachableWithDynamite() {
-        if (axe){
-            return false;
-        }
 
         int[] items = new int[3];
         items[AXE] = 0;
@@ -329,6 +317,19 @@ public class State {
         return true;
     }
 
+    private boolean cutDownTree() {
+        LinkedList<Move> moves = curMap.cutDownTree(curLocation, direction);
+        
+        if(moves != null){
+            while (moves.size() > 0 ) {
+                Move temp = moves.remove();
+                movesToDo.add(temp);
+            }
+            return false;
+        }
+        return true;
+    }
+    
     // We found the gold, let's finish this
     private void goHome() {
         //Go Back in reverse order
