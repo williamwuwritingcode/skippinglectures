@@ -189,11 +189,11 @@ public class Map {
                 LinkedList<Point2D.Double> path = search.isPointReachable(tree, currLoc, direction, items);
                 if (!(path == null)) {
                     treeLocations.remove(i);
-                    return changePathToMoves(path, direction);
+                    moves = changePathToMoves(path, direction);
                 } 
             } 
         }
-        return null;
+        return moves;
     }
     
     //prints the current map
@@ -398,8 +398,38 @@ public class Map {
                 System.out.println("Map null at " + next);
                 break;
             }else if (map.get(next) == 'T') {
+                LinkedList<Move> temp = determineRotation(curLoc, next, curOrientation);
+                while (temp.size() > 0) {
+                    Move curMove = temp.remove();
+                    switch (curMove.getMove()) {
+                        case 'r':
+                            curOrientation++;
+                            if (curOrientation > 4) curOrientation = 1;
+                            break;
+                        case 'l':
+                            curOrientation--;
+                            if (curOrientation < 1) curOrientation = 4;
+                            break;
+                    }     
+                retVal.add(curMove);
+                }
                 retVal.add(new Move('c')); 
-            } else if (map.get(next) == '*') { 
+            } else if (map.get(next) == '*') {
+                LinkedList<Move> temp = determineRotation(curLoc, next, curOrientation);
+                while (temp.size() > 0) {
+                    Move curMove = temp.remove();
+                    switch (curMove.getMove()) {
+                        case 'r':
+                            curOrientation++;
+                            if (curOrientation > 4) curOrientation = 1;
+                            break;
+                        case 'l':
+                            curOrientation--;
+                            if (curOrientation < 1) curOrientation = 4;
+                            break;
+                    }     
+                retVal.add(curMove);
+                } 
                 retVal.add(new Move('b'));
             }else{
                 // Determine which we way need to rotate (if at all) to get to it 
