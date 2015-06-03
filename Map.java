@@ -30,6 +30,10 @@ public class Map {
 	public static final int DYNAMITE = 1;
 	public static final int BOAT = 2;
 
+    //permissions to use tools
+    public static final int NOT_ALLOWED = -1;
+    public static final int DONT_HAVE = 0;
+    public static final int USEABLE = 1;
 
 	public Map()
 	{
@@ -37,6 +41,7 @@ public class Map {
 		this.topLeft = new Point2D.Double(0, 0);
 		this.bottomRight = new Point2D.Double(0, 0);
 
+        //create a search object and give it a copy of the map
 		Hashtable<Point2D.Double, Character> searchMap = (Hashtable<Point2D.Double, Character>)map.clone();
 		Point2D.Double searchTl = (Point2D.Double) topLeft.clone();
 		Point2D.Double searchBr = (Point2D.Double) bottomRight.clone();
@@ -55,8 +60,11 @@ public class Map {
         search.clear();        
     }
     
+
+    // Updates the map to reflect a dynamite has been picked up
     public boolean acquireDynamite(Point2D.Double check) {
         char temp;
+        //check the current location has an axe
         temp = map.get(check);
         if (temp == 'd') {         
             return true;
@@ -64,8 +72,10 @@ public class Map {
         return false;
     }
 
+    // Updates the map to reflect a dynamite has been picked up
     public boolean acquireAxe(Point2D.Double check) {
         char temp;
+        //check the current location has an axe
         temp = map.get(check);
         if (temp == 'a') {         
             return true;
@@ -84,8 +94,9 @@ public class Map {
         for(int x = 0; x < 5;x++){
         	double xGlobal = 0;
         	double yGlobal = 0;
-             for(int y = 0; y < 5; y++)
+            for(int y = 0; y < 5; y++)
         	{
+                //if it is the agents' current location, fill the map with a space
                 if (x == 2 && y == 2) {
                     xGlobal = currPos.getX();
                     yGlobal = currPos.getY();
@@ -134,18 +145,16 @@ public class Map {
 	        		bottomRight = new Point2D.Double(bottomRight.getX(), yGlobal);
         	}
         }
-        
-        printMap();
 	}
 
 	//Updates one point on the map at a time
 	public void updateMapPoint(Point2D.Double point, Character thing)
 	{
+        //add the character to the map
 		map.put(point, thing);
 
-		//update gold location
+		//Update the saved location of useful items
 		if(thing.equals('g')) {
-            System.out.println("updating gold");
 			this.goldLocation = point;
         } else if (thing.equals('d')) {
 			this.dynamiteLocations.add(point);
@@ -156,7 +165,6 @@ public class Map {
         } else if (thing.equals('T')) {
             this.treeLocations.add(point);
         }
-
 
 		//update bottom right and top left if needed
 		if (point.getX() > bottomRight.getX())
@@ -170,20 +178,20 @@ public class Map {
 			bottomRight.setLocation(bottomRight.getX(), point.getY());
 	}
 
-	// Finds a tree and cuts it down 
+	// Finds a list of moves the agent should make to get to a tree and cut it down.
+    // If there are no reachable trees null will be returned.
     public LinkedList<Move> cutDownTree(Point2D.Double currLoc, int direction){
-        System.out.println("in cutDownTree");    	
+  	
         LinkedList<Move> moves = null;
         
 		search.updateMap(map, topLeft, bottomRight);
         int[] items = new int[3];
         items[AXE] = 1;
-        items[DYNAMITE] = -1;
+        items[DYNAMITE] = NOT_ALLOWED;
         items[BOAT] = 0; 
             
         // Make sure there are trees
         if (treeLocations.size() > 0) {
-
             for (int i = 0; i < treeLocations.size(); i++) {
                 Point2D.Double tree = treeLocations.get(i);
                 LinkedList<Point2D.Double> path = search.isPointReachable(tree, currLoc, direction, items);
@@ -199,18 +207,25 @@ public class Map {
     //prints the current map
 	public void printMap()
 	{
+        //put plusses in the corners
         System.out.print("+ ");
+
+        //print grid locations at the top of the map
         for (int i = (int) topLeft.getX(); i <= bottomRight.getX(); i++) {
             System.out.print(Math.abs(i));
         }
         System.out.print(" +");
         System.out.println("");
+
+        //print out the map line by line from top left to bottom right
 		for(int y = (int)topLeft.getY(); y >= bottomRight.getY(); y--)
 		{
+            //Print y coordinate for each line
 		    System.out.print(Math.abs(y) + " ");
 
 		    for(int x = (int)topLeft.getX(); x <= bottomRight.getX(); x++)
 		    {
+                //print what is at each map location. If nogthing a question mark will be printed
                 Point2D.Double currentPos = new Point2D.Double(x, y);
 				Character thing = map.get(currentPos);
    				if(thing == null)
@@ -222,6 +237,7 @@ public class Map {
    			System.out.println("");
    		}
    	    
+        //plusses in the corner and grid locations along the bottom
         System.out.print("+ ");
         for (int i = (int) topLeft.getX(); i <= bottomRight.getX(); i++) {
             System.out.print(Math.abs(i));
@@ -230,27 +246,22 @@ public class Map {
         System.out.println("");
 
     }
+
 	// Determines if we can reach te gold.
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
-    // Updates the moves queue.
-    public LinkedList<Move> isGoldReachable(int orientation, Point2D.Double currLoc, int[] items) {
-        System.out.println("in isgoldReachable");    	
+    // Returns a list of move to take to reach the gold
+    public LinkedList<Move> isGoldReachable(int orientation, Point2D.Double currLoc, int[] items) {   	
         LinkedList<Move> moves = null;
         
 		search.updateMap(map, topLeft, bottomRight);
         
-        // check if we know where to gold is
+        // check if we know where the gold is
         if(goldLocation != null){
+            //BFS to find the gold
             LinkedList<Point2D.Double> path = search.isPointReachable(goldLocation, currLoc, orientation, items);
             if(path != null){
-                System.out.println("Found a path to gold!");
                 moves = changePathToMoves(path, orientation);
-                for (Move temp: moves){
-                    System.out.print(temp.getMove());
-                }
-                System.out.println("");
-
             } 
         }
         return moves;
@@ -258,13 +269,13 @@ public class Map {
     
     // Determines whether or not we can get to some dynamite.
     // We place restrictions on using dynamite to get to it for now. This might be a mistake TODO
-    // Updates the moves queue.
+    // Returns a list of moves to take to reach the dynamite null if no dynamite is reachable
     public LinkedList<Move> isDynamiteReachable(int orientation, Point2D.Double currLoc, int[] items) { 
         LinkedList<Move> moves = null;
         LinkedList<Point2D.Double> path = null;
-
 		search.updateMap(map, topLeft, bottomRight);
-        
+
+        //BFS for each dynamite location saved until dynamite is reached.
         for(int i = 0; i < dynamiteLocations.size(); i++){
             path = search.isPointReachable(dynamiteLocations.get(i), currLoc, orientation, items);
             if(path != null) break;
@@ -277,9 +288,8 @@ public class Map {
         return moves;
     }
 
-    // Determines whether or not the axe is reachable. 
-    // We place on restrictions on using dynamite to get to it. This might be a mistake TODO
-    // Updates the moves queue.
+    // Determines whether or not the axe is reachable., given the premissions for tools in useableItems. 
+    // Returns a list of moves to make to reach acquire the axe, null if there is no reachable axe.
     public LinkedList<Move> isAxeReachable(Point2D.Double currLoc, int direction, int[] useableItems){
         LinkedList<Move> moves = null;
         LinkedList<Point2D.Double> path = null;
@@ -298,7 +308,7 @@ public class Map {
         return moves;
     } 
 
-    // Go Home
+    // Returns a list of moves to take the agent back to the start
     public LinkedList<Move> goHome(Stack<Move> movesTaken) {
         Move temp = null;
         Move newMove = null;
@@ -331,7 +341,7 @@ public class Map {
         return goldLocation;
     }
 
-    //Given the current location checks to see if the entirereachable area has been 
+    //Given the current location checks to see if the entire reachable area has been 
     //explored. The reachable area is defined as everywhere reachable from the current 
     // location without using any tools.
     //returns:  - null if the area has been explored
@@ -351,15 +361,17 @@ public class Map {
     // Determines whether a space is empty
     public boolean isEmptySpace(Point2D.Double point, boolean axe) {
 		if (map.containsKey(point)) {
-            
+
             char temp = map.get(point);
 		    if (temp == 'g' || temp == ' ' || temp  == 'e'|| temp == 'a' || temp == 'd') { 
                 return true;
 		    } else if (map.get(point) == 'T' && axe) {
-		    	return true;
+		        //the space is considered empty if there is a tree there and we have an axe. 
+            	return true;
 		    }
 		    return false;
     	}
+        //if the map  does not contain the key default to false
     	return false;
     }
     
@@ -370,7 +382,7 @@ public class Map {
         } 
     }
     
-    //Removes a wall using axe
+    //Removes a tree using axe
     public void chop(Point2D.Double point) {
         if (map.get(point) == 'T') {
             map.put(point, ' ');
@@ -378,7 +390,6 @@ public class Map {
     }
 
     //Takes in a linked list of points to visit and current orientation and returns the moves to get there.
-    //This needs to be modified to add cuts and blow ups in the change over process
     private LinkedList<Move> changePathToMoves(LinkedList<Point2D.Double> path, int orientation){
     
         // Keeps track of location
@@ -395,7 +406,6 @@ public class Map {
             Point2D.Double next = path.remove();
 
             if (map.get(next) == null){
-                System.out.println("Map null at " + next);
                 break;
             }else if (map.get(next) == 'T') {
                 LinkedList<Move> temp = determineRotation(curLoc, next, curOrientation);

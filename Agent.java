@@ -18,38 +18,16 @@ public class Agent {
     }
 
     public char get_action( char view[][] ) {
-      
+      //Update the current states map object with the new view
+      curState.updateCurMap(view);
+
+      //ask the current state for a move
       Move temp = curState.makeMove();
+      //adjust the current state with the move that has been made
       curState.adjustState(temp);
+      
+      //return the char version opf the Move
       return temp.getMove();
-/*
-      // REPLACE THIS CODE WITH AI TO CHOOSE ACTION
-
-      int ch=0;
-
-      System.out.print("Enter Action(s): ");
-
-      try {
-         while ( ch != -1 ) {
-            // read character from keyboard
-            ch  = System.in.read();
-
-            switch( ch ) { // if character is a valid action, return it
-            case 'F': case 'L': case 'R': case 'C': case 'B':
-            case 'f': case 'l': case 'r': case 'c': case 'b':
-                
-                //Make a new move and update the state
-                Move temp = new Move((char)ch);
-                curState.adjustState(temp);
-                return((char) ch );
-            }
-         }
-      }
-      catch (IOException e) {
-         System.out.println ("IO error:" + e );
-      }
-        assert(false); //Should never get to here, panic
-        return 'f';  */
    }
 
    void print_view( char view[][] )
@@ -117,10 +95,6 @@ public class Agent {
                   }
                }
             }
-
-            agent.print_view( view ); // COMMENT THIS OUT BEFORE SUBMISSION
-
-            curState.updateCurMap(view);
 
             action = agent.get_action( view );
             

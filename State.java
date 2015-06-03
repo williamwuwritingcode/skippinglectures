@@ -10,7 +10,6 @@ public class State {
     private int dynamite; // Determines how many dynamites we have
     private int boat;
     private Point2D.Double curLocation; // Current Location
-    private Stack unexplored; // ?
     private Queue<Move> movesToDo; // Current queue of moves to be executed. This is automic.   
     private int direction; //(used as an enum: 1 = up, 2 = right, 3 = down, 4 = left (clockwise from up position));
     private boolean gold;
@@ -20,7 +19,10 @@ public class State {
     public static final int DYNAMITE = 1;
     public static final int BOAT = 2;
 
+    //permissions to use tools
     public static final int NOT_ALLOWED = -1;
+    public static final int DONT_HAVE = 0;
+    public static final int USEABLE = 1;
     
     public State(){
     	curMap = new Map();
@@ -31,7 +33,6 @@ public class State {
         boat = 0;
         axe = false;
         movesTaken = new Stack<Move>();
-        unexplored = new Stack();
         movesToDo = new LinkedList<Move>();
     }
  
@@ -64,8 +65,7 @@ public class State {
 		//Case of trying to move forward	
         case 'f': case 'F':
            
-           // See if forward move is valid. Not actually required when we run the AI since it does 
-           // this check anyway but eh
+           // See if forward move is valid. Not actually required when we run the AI since it checks.
            if (curMap.isEmptySpace(inFront, false)) {
                 curLocation = inFront;
            }
@@ -76,7 +76,6 @@ public class State {
            } else if (curMap.acquireAxe(inFront)) {
                 axe = true;
            }
-
            break; 
         
         //Case of trying to chop down	
@@ -86,26 +85,15 @@ public class State {
 		
 		//Case of trying to blow stuff up
 		case 'b': case 'B':
-            
-            //Blow it up
             curMap.blow(inFront);
             dynamite--;    
 			break;
-		
 		}	
         assert(direction > 0 && direction < 5); //Sanity Check
         
         //Update movesTaken
         movesTaken.push(thing);
         
-        //Print the map
-        curMap.printMap();
-        
-        //Print out the state information
-        System.out.println("Direction is: " + direction);
-        System.out.println(dynamite + " dynamite");
-        System.out.println("curLocation is (" + curLocation.getX() + ", " + (int)curLocation.getY() + ")");
-
         return;
     }
 
@@ -120,19 +108,17 @@ public class State {
     // should be made next. Other wise it pulls the next item off the queue.
     public Move makeMove() {
         
-        // Are there any other moves?
+        // Are there any moves still in the move queue
         Move temp = movesToDo.poll();
-        
         if (temp != null) {
-            
             // If the move is to go forward and forward means going into water w/o boat,
             // cancel the move.
             if (!(!curMap.isEmptySpace(getPointInFront(), false) && temp.getMove() =='f')) {
                 return temp;
             }
-            
         }
         
+        //If the agent has the gold, go back to the start position       
         if (gold) {
             goHome();
             temp = (Move) movesToDo.poll();
@@ -140,9 +126,8 @@ public class State {
             return temp;
         }
 
-
+        //If the agent can reach the gold, knowing whats on the current map, go there
         if (isGoldReachable()) {
-             System.out.println("gold");
              temp = (Move) movesToDo.poll();
              gold = true;
              assert(temp != null);
@@ -150,46 +135,47 @@ public class State {
         }
         
         if (!axe) {
+            //if the agent doen't have an axe, check if it can aquire one, if so, acquire it
             if (isAxeReachable()) {
-                System.out.println("AXE");
                 temp = (Move)movesToDo.poll();
                 assert(temp != null);
                 return temp;
             }
         }
 
+        //check if the agent can reach some dynamite, if so acquire it.
         if (isDynamiteReachable()) {
-             System.out.println("Dynam");
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
         }
 
+        //check if the entire map has been explored without the use of any tools
         if (!isExplored()) {
-            System.out.println("Is not explored");
              temp = (Move) movesToDo.poll();
              assert(temp != null);
              return temp;
         
+        //Agent has little choices anymore.
         } else {
+            // So see if the agent can reach an axe via the use of dynamite.
+            //This will open more of the board up to be explored
             if (!axe) {
                 if (isAxeReachableWithDynamite()) {
-                    System.out.println("Blowing shit up");
                     temp = (Move) movesToDo.poll();
                     assert(temp != null);
                     return temp;
                 }
 
-            // Find a tree and cut it down 
+            //Agent will cut down a tree. This will open more of the board up for exploration
             } else {
                 cutDownTree();
-                System.out.println("looking for a tree to be cut down");
                 temp = (Move) movesToDo.poll();
                 assert(temp != null);
                 return temp;
             }
         }
-        assert(false);
+        assert(false); // should never get to here
         return temp;
     }
 
@@ -198,56 +184,60 @@ public class State {
     // We remove any restrictions on whether or not we use the dynamite to get to it as if we can get
     // to the gold it's game over. 
     // Updates the moves queue.
-    private boolean isGoldReachable() {
-        System.out.println("inGold"); 
+    private boolean isGoldReachable() { 
         // If we haven't found gold yet, no point searching for it.
         Point2D.Double goldLoc = curMap.getGoldLocation();
         if (goldLoc == null) {
             return false;
         }
 
-        System.out.println("not Null");
+        //set permissions for tool user during the breadth first search
         int[] items = new int[3];
 
         if(axe) {
-            items[AXE] = 1;
+            items[AXE] = USEABLE;
         } else {
-            items[AXE] = 0;
+            items[AXE] = DONT_HAVE;
         }
 
         items[DYNAMITE] = dynamite;
         items[BOAT] = boat;
         LinkedList<Move> moves = curMap.isGoldReachable(direction, curLocation, items);
+
+        //see if there are any moves
         if (moves == null) {
             return false;
         } else {
+            //add the moves returned to the moves queue
             while (moves.size() > 0) {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
             }
-
             return true;
         }
-
     }
     
     // Determines whether or not we can get to some dynamite.
-    // We place restrictions on using dynamite to get to it for now. This might be a mistake TODO
+    // We place restrictions on using dynamite to get to it for now. 
     // Updates the moves queue.
     private boolean isDynamiteReachable() {
+        //Set permissions for the use of tools
         int[] items = new int[3];
 
-        if(axe) items[AXE] = 1;
-        else items[AXE] = 0;
+        if(axe) items[AXE] = USEABLE;
+        else items[AXE] = DONT_HAVE;
 
         items[DYNAMITE] = NOT_ALLOWED;
         items[BOAT] = boat;
-        //ask the map if dynamite is reachable
+
+        //ask the map if dynamite is reachable using permissions above
         LinkedList<Move> moves = curMap.isDynamiteReachable(direction, curLocation, items);         
 
+        //check if the map returned moves to reach the dynamite
         if (moves == null) {
             return false;
         }else{
+            //add the moves to the moves queue
             while (moves.size() > 0 ) {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
@@ -257,19 +247,23 @@ public class State {
     }
 
     // Determines whether or not the axe is reachable. 
-    // We place on restrictions on using dynamite to get to it. This might be a mistake TODO
+    // We place on restrictions on using dynamite to get to it. 
     // Updates the moves queue.
     private boolean isAxeReachable(){
-
+        //Set permissions for the use of tools.
         int[] items = new int[3];
-        items[AXE] = 0;
+        items[AXE] = DONT_HAVE;
         items[BOAT] = boat;
         items[DYNAMITE] = NOT_ALLOWED;
+        
+        //Ask the map if axe is reachable
         LinkedList<Move> moves = curMap.isAxeReachable(curLocation, direction, items );         
 
+        //check if the map returned moves to mreach the axe
         if (moves == null) {
             return false;
         }else{
+            //add the moves to the move queue
             while (moves.size() > 0 ) {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
@@ -279,18 +273,22 @@ public class State {
 
     } 
 
-    // Use dynamite to check to see if we can get axe
+    // Use dynamite to check to see if we can get axe.
     private boolean isAxeReachableWithDynamite() {
-
+        //Sert permissions for the use of tools.
         int[] items = new int[3];
         items[AXE] = 0;
         items[BOAT] = boat;
         items[DYNAMITE] = dynamite;
+
+        //Ask the map if axe is reachable
         LinkedList<Move> moves = curMap.isAxeReachable(curLocation, direction, items);         
 
+        //check if the map returned moves to the axe
         if (moves == null) {
             return false;
         }else{
+            // add the moves to the queue
             while (moves.size() > 0 ) {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
@@ -300,14 +298,16 @@ public class State {
 
     }
 
-    // Determines whether or not the current "space" is explored.
-    // In the case of a maze like arena, this returns true if each branch is explored without having
-     // to cut anything down or blow anything up.
-    // Updates the moves queue.
+    //Determines if the entire reachable area has been explored. The reachable area is 
+    // defined as everywhere reachable from the current location without using any tools.
     private boolean isExplored() {
+
+        //ask the map if the area has been explored
         LinkedList<Move> moves = curMap.isExplored(curLocation, direction);
 
+        //check if the map returned any moves
         if(moves != null){
+            //add the moves to the queue
             while (moves.size() > 0 ) {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
@@ -317,10 +317,15 @@ public class State {
         return true;
     }
 
+    // finds a list of moves the agent must take in order to cut down a tree. (No
+    //specific tree is defined)
     private boolean cutDownTree() {
+        //ask the map for move to cut down a tree
         LinkedList<Move> moves = curMap.cutDownTree(curLocation, direction);
         
+        //see if the map returned any moves
         if(moves != null){
+            //add the moves top the move queue
             while (moves.size() > 0 ) {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
@@ -335,7 +340,9 @@ public class State {
         //Go Back in reverse order
         LinkedList<Move> moves = curMap.goHome(movesTaken);
 
+        //check the map returned moves to home
         if(moves != null){
+            //add the moves to the move queue
             while (moves.size() > 0 ) {
                 Move temp = moves.remove();
                 movesToDo.add(temp);
@@ -371,6 +378,7 @@ public class State {
     
     }
 
+    // Returns a poin2d representing the square directly in front
     private Point2D.Double getPointToLeft() {
 
         Point2D.Double forwardPoint = null;        
@@ -394,6 +402,7 @@ public class State {
         return forwardPoint;
     }
 
+    // Returns a poin2d representing the square directly in front
     private Point2D.Double getPointToRight() {
 
         Point2D.Double forwardPoint = null;        

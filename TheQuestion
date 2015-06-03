@@ -1,0 +1,61 @@
+ANSWER TO THE QUESTION
+
+As the player explores the map, all items within the agents 'view' are
+ saved as in a hashtable that uses map coordinates as keys. 
+
+The program uses a breadth first search to search the map for gold and
+other useable items. It will check for possible future states in
+ order of highest ot lowest priority. These states, in the order their
+ tested in, are:
+
+1.	CHECK Are we currently holding gold?
+
+	TRUE  Go back to where we started
+
+	FALSE Make the next check
+
+
+2. 	CHECK Is gold reachable using tools we have or can acquire 
+	 on our journey to the gold? (If gold is not on the current map the check will return false)
+
+	TRUE Go to the gold and acquire it
+
+	FALSE Go to the next check
+
+
+3.  CHECK Is the axe reachable?
+
+	TRUE Aquire the axe
+
+	FALSE Go to the next check  
+
+4. 	CHECK Is the dynamite reachable? (this check includes the 
+	 use of axes and boats to get the dynamite)
+
+	TRUE Undergo moves ot aquire the gold
+
+	FALSE Go to the next check
+ 
+
+5.	CHECK Is the map explored? (has the agent visited every
+ 	 point on the map that it can visit without the use of tools)
+
+ 	TRUE Go to the next check
+
+ 	FALSE Go to the closest place that is unexplored
+
+6.	CHECK Do we have the axe? (if nothing else can be accomplished with
+ 	 current map, either blow some walls up to get the axe or cut some
+ 	 trees down using the axe)
+
+ 	TRUE cut down the closest tree on the map
+
+ 	FALSE go to next check
+
+7.	CHECK Is axe reachable using dynamite?
+
+	TRUE Acquire the axe and sacrifice dynamite (Sometimes trees 
+	 need to be cut down to explore the area with the gold)
+
+	FALSE go to next check
+

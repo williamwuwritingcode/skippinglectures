@@ -25,6 +25,7 @@ public class Search{
 	public static final int DYNAMITE = 1;
 	public static final int BOAT = 2;
 
+    //permissions to use the tools
 	public static final int NOT_ALLOWED = -1;
 	public static final int DONT_HAVE = 0;
 	public static final int USEABLE = 1;
@@ -77,11 +78,12 @@ public class Search{
 		bottomRight = br;
 
 		//should update map to hold values where question marks used to be, but 
-		//not override areas we have explored
+		//not override areas agent has explored
 		for(double row = br.getY(); row <= tl.getY(); row++)
 		{
 			for(double col = tl.getX(); col <= br.getX(); col++)
 			{
+
 				Point2D.Double loc = new Point2D.Double(col, row);
 				
                 //the values at this point in both the maps
@@ -104,8 +106,6 @@ public class Search{
                 }
 			}
 		}
-
-		printMap();
 	}
 
 	//Determines whether a point is reachable given a current location and an array of things it's 
@@ -114,24 +114,20 @@ public class Search{
 	//         linkedList of Points for the fastest path to the point. 
 	public LinkedList<Point2D.Double> isPointReachable(Point2D.Double destination, Point2D.Double currLoc, int direction, int[] useableItems)
 	{	
-		//NB:can optimise this by checking if the area around the point is marked 'e'
-		System.out.println("Searching from "+ currLoc + " to "+destination);
-        // Queue of routes. A route is a search state.
+		// Queue of routes. A route is a search state.
         LinkedList<Route> nextRouteQueue = new LinkedList<Route>();
 
-        //if value is not a valid point, don't add it 
+        //Create a hashtable of points to be moved to. This hastable is used to ensure the search doesnb't search the same node multiple times. 
         toBeMoved = new Hashtable<Point2D.Double, Character>();
 
         // A path to the required point. Doesn't get updated if not reachable.
 		LinkedList<Point2D.Double> pathToPoint = null;
 
-        
-        toBeMoved = new Hashtable<Point2D.Double, Character>();
-
     	//start the first path in the queue with just currLoc
     	Route initRoute = new Route(currLoc, useableItems.clone()); 
     	nextRouteQueue.add(initRoute);
 
+        //Boolean used to check kif the destination has been found. Used to break out of the double loop
         boolean temp = false;
 
         // While there are search states to be searched
@@ -140,19 +136,23 @@ public class Search{
     		//get the next path in the queue and location of the last point in the list
     		Route route = nextRouteQueue.remove();
 
-    		// Check if the adjacent points are moveable 
+    		// Check if points adjacent to the last point in the routes path. 
     		adjSearched = false;
     		LinkedList<Route> nextRoutes = areAdjacentMoveable(route);
 
+            //Check if there are further routes to be searched
     		if(nextRoutes != null){
+                //add routes to the queue
     			for(int i = 0; i < nextRoutes.size(); i++){
       				Route curRoute = nextRoutes.get(i);
+
                     //check if any of the routes we're adding go to the destination
     				if(curRoute.path.getLast().equals(destination)){
     					pathToPoint = curRoute.path;
     					temp = true;
                         break;
     				}
+
 					nextRouteQueue.add(curRoute);
     			}
     		}
@@ -162,7 +162,7 @@ public class Search{
         return pathToPoint;
 	}	
 
-    // Clears the Hashtable I don't think we need this TODO
+    // Clears the Hashtables I don't think we need this
     public void clear() {
         toBeSearched = new Hashtable<Point2D.Double, Character>();
         toBeMoved = new Hashtable<Point2D.Double, Character>();
@@ -171,7 +171,7 @@ public class Search{
 	// Determines whether or not the current "space" is explored.
     // In the case of a maze like arena, this returns true if each branch is explored without having
     // to cut anything down or blow anything up.
-    // Updates the moves queue.
+    // Returns a list of points to visit to reach the unexplored
     public LinkedList<Point2D.Double> isExplored(Point2D.Double currLoc) {
     	
     	// Check if the internal explored value is true, if so no need to search.
@@ -201,8 +201,7 @@ public class Search{
     		Point2D.Double point = path.getLast();
 
     		//check if the adjacent points have been explored
-            //Put a hashtable or something here that tracks whether or not that point is already on 
-            //the queue.
+            //Create a hashtable here that tracks whether or not that point is already on the queue.
     		adjExplored = false;
     		LinkedList<Point2D.Double> nextPoints = areAdjacentExplored(point);
 
@@ -230,10 +229,9 @@ public class Search{
 	    	}
 
 	    	//mark that node explored so we don't visit it again (Don't do that if there is an axe, boats e.t.c)
-    	    if(!(map.get(point) == 'B')) {
+    	    if(map.get(point) == ' ') {
     		    map.put(point, 'e');
             }               
-
     	}	
     	
         //return the linked list that this class passes back
@@ -254,13 +252,10 @@ public class Search{
 
 	//Takes in a current location and checks if all adjecent squares (north, south, east, west)
     // have been explored or not.
-    // areThey - is a pointer to a boolean that will be changed to false if adjacent points have not
-    // been explored and true of all have been explored
-    // returns:  	- areThey == true returns a linked list of all the adjecent points
+    // returns:  	- returns a linked list of all the adjecent points
     // 					  that are moveable to
-    //				- areThey == false returns a linked list of the first point found 
+    //				- returns a linked list of the first point found 
     // 					  point that is unexplored. 
-    //NB: Currently prefers north, then east, south, west. 
     private LinkedList<Point2D.Double> areAdjacentExplored(Point2D.Double currLoc)
     {
     	
@@ -304,8 +299,7 @@ public class Search{
                 toBeSearched.put(p[i],map.get(p[i])); 
 
 	    	
-            // If not any of the options above, we can't move into these spots. 
-	    
+                // If not any of the options above, we can't move into these spots.     
             }
         }
 	    //if program reaches here, all points must have been explored
@@ -313,7 +307,9 @@ public class Search{
 	   	return nextPointsToVisit;
     }
 
+    //Checks if the places adjacent to the last point in a queue can be moved to.
     LinkedList<Route> areAdjacentMoveable(Route route){
+
     	Point2D.Double point = route.path.getLast();
     	LinkedList<Route> newRoutes = null;
        
@@ -323,29 +319,32 @@ public class Search{
         toBeMoved.put(point, 'x');
          
         for(int i = 0; i < WEST; i++)
-    	{
+        {
+            //Check if the point is already visited/to be visited
             if (toBeMoved.containsKey(p[i])) { 
                 continue;
             } else {
+                //add it to the to be moved queue
                 toBeMoved.put(p[i], '?');
             }
             
+            //cerate a new route for this point. (add point to route checks whether the point can be moved to)
             Route newRoute = route.clone();
     		boolean moveSuccess = addPointToRoute(newRoute, p[i]);
     		
     		if(moveSuccess){
-                
+                //if newRoutes queue not initioalised, ionitialise it
     			if(newRoutes == null)
     				newRoutes = new LinkedList<Route>();
-
+                //add the new route to the new routes queue
     			newRoutes.add(newRoute);
     		}
     	}
     	return newRoutes;
     }
 
-    //Adds a point to a route. Will return true or false depending on if 
-    //the route was updated
+    //Adds a point to a route, given the point can be moved to. Will return true or false depending on if 
+    //the route was updated.
     boolean addPointToRoute(Route route, Point2D.Double point)
     {
     	boolean canMoveTo = false;
@@ -379,7 +378,7 @@ public class Search{
 				break;
 
 			//can move here if allowed to use the boat and are standing on a boat or
-			// already on top of the water
+			//already on top of the water
 			case '~':
 				char prevValue  = map.get(prev);
 				if((route.useableItems[BOAT] != NOT_ALLOWED) &&
@@ -446,7 +445,5 @@ public class Search{
         }
         System.out.print(" +");
         System.out.println("");
-
-
 	}
 }
