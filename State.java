@@ -1,3 +1,20 @@
+/**
+* The program has three main classes. State, Map and Search. As the player explores the map, the state will be updated 
+* with orientation and location information and the map will be updated with the current view. The Map holds a hashtable
+* which uses points as keys, the  point of origin is the maps (0, 0). 
+*
+* When deciding on what move to make the State will ask the map if certain objects are reachable or the map has been 
+* explored in a prioritised order. The map will call the search to 'search' for the object asked of, a breadth first search 
+* is performed by the search object to determine which points on the map are reachable from a certain location. The search
+* will be given an array of permissions which outlines which tools the agent is allowed to uise along its' journey to a given point. 
+* the map object will convert the points in a path to the destination that the search has supplied into an array of moves. The moves
+* will be stored by the state and popped off a queue each time bounty asks for a move. 
+*
+*/
+
+
+
+
 import java.util.*;
 import java.awt.geom.Point2D;
 import java.io.*;
@@ -93,7 +110,7 @@ public class State {
         
         //Update movesTaken
         movesTaken.push(thing);
-        
+
         return;
     }
 
